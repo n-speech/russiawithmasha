@@ -1,54 +1,79 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Page protégée</title>
+  <title>Вход по паролю</title>
   <style>
     body {
-      font-family: Arial;
-      text-align: center;
-      padding: 50px;
+      margin: 0;
+      font-family: sans-serif;
+      background: #f0f0f0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      padding: 1rem;
     }
-    input {
-      padding: 10px;
-      font-size: 16px;
+
+    .container {
+      background: white;
+      padding: 2rem;
+      border-radius: 10px;
+      box-shadow: 0 0 15px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 400px;
     }
+
+    input[type="password"], button {
+      width: 100%;
+      padding: 0.75rem;
+      margin-top: 1rem;
+      font-size: 1rem;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
     button {
-      padding: 10px 20px;
-      font-size: 16px;
-      margin-top: 10px;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
     }
+
+    button:hover {
+      background-color: #45a049;
+    }
+
     #error {
       color: red;
-      margin-top: 10px;
+      margin-top: 1rem;
     }
   </style>
 </head>
 <body>
 
-  <h2>Введите пароль :</h2>
-  <input type="password" id="passwordInput" placeholder="пароль">
-  <br>
+<div class="container">
+  <h2>Введите пароль:</h2>
+  <input type="password" id="password" placeholder="Пароль" />
   <button onclick="checkPassword()">Войти</button>
-  <div id="error"></div>
+  <p id="error"></p>
+</div>
 
-  <script>
-    const PASSWORD = "123"; // ← задай свой пароль
-    const REDIRECT_URL = "page2.html"; // ← путь к целевой странице
+<script>
+  const correctPassword = "1234"; // задай свой пароль
+  const redirectURL = "page1.html"; // страница, на которую перенаправим
 
-    function checkPassword() {
-      const input = document.getElementById("passwordInput").value;
-      const error = document.getElementById("error");
-
-      if (input === PASSWORD) {
-        // переход на другую страницу
-        window.location.href = REDIRECT_URL;
-      } else {
-        error.textContent = "Неправильный пароль";
-      }
+  function checkPassword() {
+    const input = document.getElementById("password").value;
+    const error = document.getElementById("error");
+    if (input === correctPassword) {
+      window.location.href = redirectURL;
+    } else {
+      error.textContent = "Неверный пароль.";
     }
-  </script>
+  }
+</script>
 
 </body>
 </html>
