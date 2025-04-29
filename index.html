@@ -2,78 +2,99 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Вход по паролю</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Вход на сайт</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
+      background: white;
       margin: 0;
-      font-family: sans-serif;
-      background: #f0f0f0;
+      padding: 0;
       display: flex;
+      height: 100vh;
       justify-content: center;
       align-items: center;
-      height: 100vh;
-      padding: 1rem;
     }
 
-    .container {
-      background: white;
+    .login-container {
+      background-color: rgba(255, 255, 255, 0.628);
       padding: 2rem;
-      border-radius: 10px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.2);
-      width: 100%;
+      border-radius: 12px;
+      
+      width: 90%;
       max-width: 400px;
     }
 
-    input[type="password"], button {
-      width: 100%;
-      padding: 0.75rem;
-      margin-top: 1rem;
-      font-size: 1rem;
-      border-radius: 5px;
+    h2 {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      color: #333;
+    }
+
+    input[type="password"] {
+      width: 95%;
+      padding: 0.8rem;
+      margin-bottom: 1rem;
       border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 1rem;
+      justify-items: center;
     }
 
     button {
-      background-color: #4CAF50;
+      width: 102%;
+      padding: 0.8rem;
+      background-color: #59a4f5;
       color: white;
       border: none;
+      border-radius: 8px;
+      font-size: 1rem;
       cursor: pointer;
+      justify-content: center;
+    
     }
 
-    button:hover {
-      background-color: #45a049;
-    }
-
-    #error {
+    .error {
       color: red;
+      text-align: center;
       margin-top: 1rem;
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      h2 {
+        font-size: 1.2rem;
+      }
+
+      input, button {
+        font-size: 0.9rem;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <h2>Введите пароль:</h2>
-  <input type="password" id="password" placeholder="Пароль" />
-  <button onclick="checkPassword()">Войти</button>
-  <p id="error"></p>
-</div>
+  <div class="login-container">
+    <h2>Вход на сайт</h2>
+    <input type="password" id="password" placeholder="Введите пароль">
+    <button onclick="checkPassword()">Войти</button>
+    <div class="error" id="errorMsg">Неверный пароль</div>
+  </div>
 
-<script>
-  const correctPassword = "1234"; // задай свой пароль
-  const redirectURL = "page1.html"; // страница, на которую перенаправим
+  <script>
+    const correctPassword = "12345"; // Замените на ваш пароль
 
-  function checkPassword() {
-    const input = document.getElementById("password").value;
-    const error = document.getElementById("error");
-    if (input === correctPassword) {
-      window.location.href = redirectURL;
-    } else {
-      error.textContent = "Неверный пароль.";
+    function checkPassword() {
+      const input = document.getElementById("password").value;
+      const errorMsg = document.getElementById("errorMsg");
+
+      if (input === correctPassword) {
+        window.location.href = "main.html"; // Страница после входа
+      } else {
+        errorMsg.style.display = "block";
+      }
     }
-  }
-</script>
+  </script>
 
 </body>
 </html>
