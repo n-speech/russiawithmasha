@@ -2,71 +2,11 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8">
-  <title>Envoyer un devoir</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 40px;
-    }
-    form {
-      background: white;
-      padding: 20px;
-      border-radius: 8px;
-      max-width: 500px;
-      margin: auto;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin-bottom: 10px;
-    }
-    input, textarea {
-      width: 100%;
-      padding: 8px;
-      margin-top: 4px;
-      margin-bottom: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-    }
-    button {
-      background-color: #183b58;
-      color: white;
-      padding: 10px 20px;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #14507a;
-    }
-  </style>
+  <title>Russia with Masha</title>
 </head>
-<body>
-
-<h2>Envoyer un devoir</h2>
-
-<form action="https://formsubmit.co/dafna5566@gmail.com" method="POST" enctype="multipart/form-data">
-  <label>Nom :
-    <input type="text" name="name" required>
-  </label>
-
-  <label>Email :
-    <input type="email" name="email" required>
-  </label>
-
-  <label>Message :
-    <textarea name="message" rows="5" required></textarea>
-  </label>
-
-  <label>Fichier (PDF, DOCX...) :
-    <input type="file" name="file" required>
-  </label>
-
-  <input type="hidden" name="_next" value="https://ton-utilisateur.github.io/merci.html">
-  
-  <button type="submit">Envoyer</button>
-</form>
-
+<body style="font-family: sans-serif; text-align: center; margin-top: 100px;">
+  <h1>Bienvenue sur Russia with Masha !</h1>
+  <p>Vous pouvez envoyer vos devoirs via le lien ci-dessous.</p>
+  <a href="form.html" style="background: #183b58; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none;">Envoyer un devoir</a>
 </body>
 </html>
