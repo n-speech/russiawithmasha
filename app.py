@@ -30,9 +30,14 @@ def send():
         with smtplib.SMTP_SSL('smtp.gmail.com', 465) as smtp:
             smtp.login(os.environ['SMTP_USER'], os.environ['SMTP_PASS'])
             smtp.send_message(msg)
-        return jsonify({'success': True})
-    except Exception as e:
-        return jsonify({'error': str(e)}), 500
+        if success:
+        return redirect(url_for('merci'))
+    else:
+        return jsonify({'error': 'Une erreur est survenue'}), 500
+
+@app.route('/merci')
+def merci():
+    return render_template('merci.html')
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
