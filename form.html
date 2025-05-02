@@ -46,27 +46,22 @@
 
 <h2>Envoyer un devoir</h2>
 
-<form action="https://formsubmit.co/ton-dafna5566@gmail.com" method="POST" enctype="multipart/form-data">
-  <label>Nom :
-    <input type="text" name="name" required>
-  </label>
+<form action="https://TON-SERVICE.onrender.com/send" method="POST" enctype="multipart/form-data">
+  <label>Nom:</label><br>
+  <input type="text" name="name" required><br><br>
 
-  <label>Email :
-    <input type="email" name="email" required>
-  </label>
+  <label>Email:</label><br>
+  <input type="email" name="email" required><br><br>
 
-  <label>Message :
-    <textarea name="message" rows="5" required></textarea>
-  </label>
+  <label>Message:</label><br>
+  <textarea name="message" rows="4" required></textarea><br><br>
 
-  <label>Fichier (PDF, DOCX...) :
-    <input type="file" name="file" required>
-  </label>
+  <label>Fichier:</label><br>
+  <input type="file" name="file" required><br><br>
 
-  <input type="hidden" name="_next" value="https://ton-utilisateur.github.io/merci.html">
-  
-  <button type="submit">Envoyer</button>
+  <button type="submit">Envoyer le devoir</button>
 </form>
+
 
 </body>
 </html>
