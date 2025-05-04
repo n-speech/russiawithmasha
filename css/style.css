@@ -166,5 +166,11 @@ html {
         height: auto;
       }
     }
+@media (max-width: 768px) {
+  .home .content {
+    text-align: left !important;
+  }
+}
+
 
     /* home section end */
