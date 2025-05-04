@@ -134,16 +134,19 @@ html {
       color:#222;
       font-size: 2rem;
       padding: 1rem;
+      text-align: left;
     }
     .home .content h3 {
       color: #222;
       font-size:medium;
       padding: 1rem;
+      text-align: left;
     }
     .home .content p {
       color: #222;
       font-size:medium;
       padding: 1rem;
+      text-align: left;
     }
 
     @media (max-width: 768px) {
