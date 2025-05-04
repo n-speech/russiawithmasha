@@ -32,7 +32,7 @@ html {
 
   section {
     min-height: 100vh;
-    padding: 1rem 8%;
+    padding: 2rem 8%;
   }
 
 
@@ -131,7 +131,7 @@ html {
     }
     
     
-    .home .content h2 {
+    .home .content h1, h2 {
       color:#222;
       font-size: 2rem;
       padding: 1rem;
@@ -167,11 +167,5 @@ html {
         height: auto;
       }
     }
-@media (max-width: 768px) {
-  .home .content {
-    text-align: left !important;
-  }
-}
-
 
     /* home section end */
