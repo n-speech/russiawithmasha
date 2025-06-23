@@ -154,7 +154,28 @@
     if (!user) {
       window.location.href = 'login.html'; // редирект если не залогинен
     } else {
-      document.getElementById("greeting").textContent = `Добро пожаловать, ${user.email}`;
+      <script type="module">
+  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
+  const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
+  const supabaseKey = '...твой ключ...';
+  const supabase = createClient(supabaseUrl, supabaseKey);
+
+  const { data: { user }, error } = await supabase.auth.getUser();
+
+  if (!user) {
+    window.location.href = 'login.html';
+  } else {
+    // 🔽 ЗАПРОСИМ имя из таблицы profiles
+    const { data: profile, error: profileError } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single();
+
+    const name = profile?.name || user.email;
+    document.getElementById("greeting").textContent = `Добро пожаловать, ${name}`;
+  }
     }
 
     const lessons = [
