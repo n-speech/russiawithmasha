@@ -90,9 +90,10 @@
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script>
-    // Замените на свои данные Supabase
+  <!-- JavaScript: подключаем Supabase через ES-модуль -->
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
+
     const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbmJxa3RhbmNycHRua3dseHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MzMyOTIsImV4cCI6MjA2NjEwOTI5Mn0.mjmZtWFREQQ3x1nu1im5Drqef1K7A_35wEEaicW-OWw';
     const supabase = createClient(supabaseUrl, supabaseKey);
@@ -107,7 +108,6 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value;
 
-      // Попытка аутентификации через Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -117,8 +117,7 @@
         errorDiv.textContent = 'Ошибка входа: ' + error.message;
         errorDiv.style.display = 'block';
       } else if (data.user) {
-        // Успешный вход — сохраняем email и идём в кабинет
-        localStorage.setItem('userEmail', email);
+        localStorage.setItem('userEmail', email); // можно использовать в кабинете
         window.location.href = 'cabinet.html';
       }
     });
