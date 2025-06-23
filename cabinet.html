@@ -140,38 +140,23 @@
 
     <div class="lessons-container" id="lessonsContainer"></div>
   </div>
-<script type="module">
-  import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
-  const supabaseKey = 'твой_ключ_anon';
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  <script type="module">
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
-  async function init() {
+    const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbmJxa3RhbmNycHRua3dseHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MzMyOTIsImV4cCI6MjA2NjEwOTI5Mn0.mjmZtWFREQQ3x1nu1im5Drqef1K7A_35wEEaicW-OWw';
+    const supabase = createClient(supabaseUrl, supabaseKey);
+
+    // Проверка: есть ли пользователь
     const { data: { user }, error } = await supabase.auth.getUser();
-    console.log('User:', user, 'Error:', error);
 
     if (!user) {
-      // Если пользователь не залогинен — перекидываем на страницу входа
-      window.location.href = 'login.html';
-      return; // чтобы дальше не выполнять код
+      window.location.href = 'login.html'; // редирект если не залогинен
+    } else {
+      document.getElementById("greeting").textContent = `Добро пожаловать, ${user.email}`;
     }
 
-    // Получаем имя из таблицы profiles
-    const { data: profile, error: profileError } = await supabase
-      .from('profiles')
-      .select('name')
-      .eq('id', user.id)
-      .single();
-
-    const name = profile?.name || user.email;
-    document.getElementById("greeting").textContent = `Добро пожаловать, ${name}`;
-
-    // Здесь инициализируем уроки, прогресс и прочее
-    initLessons();
-  }
-
-  function initLessons() {
     const lessons = [
       { id: 1, title: "Урок 1: A–F", description: "Изучаем первые буквы", always_open: true },
       { id: 2, title: "Урок 2: G–L", description: "Следующие 6 букв", always_open: false },
@@ -235,17 +220,11 @@
       }
     });
 
+    // Кнопка "выйти"
     document.getElementById("logoutBtn").addEventListener("click", async () => {
       await supabase.auth.signOut();
       window.location.href = 'login.html';
     });
-  }
-
-  // Запускаем всё
-  init();
-</script>
-
-
-
+  </script>
 </body>
 </html>
