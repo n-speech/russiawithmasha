@@ -141,32 +141,20 @@
     <div class="lessons-container" id="lessonsContainer"></div>
   </div>
 
-  <script type="module">
-    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
-
-    const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImhxbmJxa3RhbmNycHRua3dseHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA1MzMyOTIsImV4cCI6MjA2NjEwOTI5Mn0.mjmZtWFREQQ3x1nu1im5Drqef1K7A_35wEEaicW-OWw';
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Проверка: есть ли пользователь
-    const { data: { user }, error } = await supabase.auth.getUser();
-
-    if (!user) {
-      window.location.href = 'login.html'; // редирект если не залогинен
-    } else {
-      <script type="module">
+ <script type="module">
   import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm';
 
   const supabaseUrl = 'https://hqnbqktancrptnkwlxuf.supabase.co';
-  const supabaseKey = '...твой ключ...';
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // твой ключ
   const supabase = createClient(supabaseUrl, supabaseKey);
 
+  // 🔐 Получаем пользователя
   const { data: { user }, error } = await supabase.auth.getUser();
 
   if (!user) {
     window.location.href = 'login.html';
   } else {
-    // 🔽 ЗАПРОСИМ имя из таблицы profiles
+    // ✅ Получаем имя из таблицы profiles
     const { data: profile, error: profileError } = await supabase
       .from('profiles')
       .select('name')
@@ -176,76 +164,76 @@
     const name = profile?.name || user.email;
     document.getElementById("greeting").textContent = `Добро пожаловать, ${name}`;
   }
-    }
 
-    const lessons = [
-      { id: 1, title: "Урок 1: A–F", description: "Изучаем первые буквы", always_open: true },
-      { id: 2, title: "Урок 2: G–L", description: "Следующие 6 букв", always_open: false },
-      { id: 3, title: "Урок 3: M–R", description: "Сложные звуки", always_open: false },
-      { id: 4, title: "Урок 4: S–Z", description: "Финальные буквы", always_open: false }
-    ];
+  // 🌟 Уроки и прогресс (как у тебя было)
+  const lessons = [
+    { id: 1, title: "Урок 1: A–F", description: "Изучаем первые буквы", always_open: true },
+    { id: 2, title: "Урок 2: G–L", description: "Следующие 6 букв", always_open: false },
+    { id: 3, title: "Урок 3: M–R", description: "Сложные звуки", always_open: false },
+    { id: 4, title: "Урок 4: S–Z", description: "Финальные буквы", always_open: false }
+  ];
 
-    const progress = [
-      { lesson_id: 1, grade: "Отлично" },
-      { lesson_id: 2, grade: "Хорошо" },
-      { lesson_id: 3, grade: null }
-    ];
+  const progress = [
+    { lesson_id: 1, grade: "Отлично" },
+    { lesson_id: 2, grade: "Хорошо" },
+    { lesson_id: 3, grade: null }
+  ];
 
-    const graded = progress.filter(p => p.grade).length;
-    const percent = Math.round((graded / lessons.length) * 100);
-    document.getElementById("progressFill").style.width = percent + "%";
-    document.getElementById("progressPercent").textContent = percent + "% завершено";
+  const graded = progress.filter(p => p.grade).length;
+  const percent = Math.round((graded / lessons.length) * 100);
+  document.getElementById("progressFill").style.width = percent + "%";
+  document.getElementById("progressPercent").textContent = percent + "% завершено";
 
-    function isLessonOpen(index) {
-      if (lessons[index].always_open) return true;
-      if (index === 0) return true;
-      const prevLessonId = lessons[index - 1].id;
-      const prevGrade = progress.find(p => p.lesson_id === prevLessonId)?.grade;
-      return !!prevGrade;
-    }
+  function isLessonOpen(index) {
+    if (lessons[index].always_open) return true;
+    if (index === 0) return true;
+    const prevLessonId = lessons[index - 1].id;
+    const prevGrade = progress.find(p => p.lesson_id === prevLessonId)?.grade;
+    return !!prevGrade;
+  }
 
-    function renderLessons() {
-      const container = document.getElementById("lessonsContainer");
-      container.innerHTML = "";
-      lessons.forEach((lesson, index) => {
-        const open = isLessonOpen(index);
-        const grade = progress.find(p => p.lesson_id === lesson.id)?.grade;
+  function renderLessons() {
+    const container = document.getElementById("lessonsContainer");
+    container.innerHTML = "";
+    lessons.forEach((lesson, index) => {
+      const open = isLessonOpen(index);
+      const grade = progress.find(p => p.lesson_id === lesson.id)?.grade;
 
-        const div = document.createElement("div");
-        div.className = "lesson" + (open ? "" : " locked");
-        div.innerHTML = `
-          <h3>${lesson.title}</h3>
-          <p>${lesson.description}</p>
-          ${grade ? `<p class="grade">Оценка: ${grade}</p>` : ""}
-          <button class="btn" ${open ? "" : "disabled"}>
-            ${open ? "Перейти к уроку" : "Недоступен 🔒"}
-          </button>
-        `;
-        container.appendChild(div);
-      });
-    }
-
-    const btn = document.getElementById("toggleLessonsBtn");
-    const lessonBox = document.getElementById("lessonsContainer");
-    let visible = false;
-
-    btn.addEventListener("click", () => {
-      visible = !visible;
-      if (visible) {
-        renderLessons();
-        lessonBox.style.display = "block";
-        btn.textContent = "Скрыть уроки";
-      } else {
-        lessonBox.style.display = "none";
-        btn.textContent = "Перейти к урокам";
-      }
+      const div = document.createElement("div");
+      div.className = "lesson" + (open ? "" : " locked");
+      div.innerHTML = `
+        <h3>${lesson.title}</h3>
+        <p>${lesson.description}</p>
+        ${grade ? `<p class="grade">Оценка: ${grade}</p>` : ""}
+        <button class="btn" ${open ? "" : "disabled"}>
+          ${open ? "Перейти к уроку" : "Недоступен 🔒"}
+        </button>
+      `;
+      container.appendChild(div);
     });
+  }
 
-    // Кнопка "выйти"
-    document.getElementById("logoutBtn").addEventListener("click", async () => {
-      await supabase.auth.signOut();
-      window.location.href = 'login.html';
-    });
-  </script>
+  const btn = document.getElementById("toggleLessonsBtn");
+  const lessonBox = document.getElementById("lessonsContainer");
+  let visible = false;
+
+  btn.addEventListener("click", () => {
+    visible = !visible;
+    if (visible) {
+      renderLessons();
+      lessonBox.style.display = "block";
+      btn.textContent = "Скрыть уроки";
+    } else {
+      lessonBox.style.display = "none";
+      btn.textContent = "Перейти к урокам";
+    }
+  });
+
+  document.getElementById("logoutBtn").addEventListener("click", async () => {
+    await supabase.auth.signOut();
+    window.location.href = 'login.html';
+  });
+</script>
+
 </body>
 </html>
