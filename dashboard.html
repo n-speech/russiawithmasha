@@ -5,7 +5,6 @@
   <title>Личный кабинет</title>
   
   <style>
-    /* стили из твоего готового дизайна — оставим как есть */
     body {
       margin: 0;
       background-color: #f9f9f9;
@@ -37,13 +36,6 @@
       font-size: 18px;
       color: #444;
       margin-bottom: 15px;
-    }
-
-    #courseGrade {
-      font-style: italic;
-      font-size: 16px;
-      color: #666;
-      margin: 5px 0 20px 0;
     }
 
     .progress-label {
@@ -160,7 +152,6 @@
   <div class="dashboard">
     <div id="welcome">Загрузка...</div>
     <div id="courseName"></div>
-    <div id="courseGrade"></div>
 
     <div class="progress-label">Прогресс:</div>
     <div class="progress-bar-container">
@@ -177,16 +168,16 @@
       <div id="lessons-list"></div>
     </div>
   </div>
-<script type="module">
+
+  <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'  // ← ВСТАВЬ СВОЙ ANON KEY
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const welcomeEl = document.getElementById('welcome')
     const courseNameEl = document.getElementById('courseName')
-    const courseGradeEl = document.getElementById('courseGrade')
     const progressBarEl = document.getElementById('progressBar')
     const progressPercentEl = document.getElementById('progressPercent')
     const lessonsListEl = document.getElementById('lessons-list')
@@ -199,7 +190,6 @@
         return
       }
 
-      // Профиль
       const { data: profile } = await supabase
         .from('profiles')
         .select('name')
@@ -208,7 +198,6 @@
 
       welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
 
-      // Доступные курсы
       const { data: userCourse } = await supabase
         .from('user_courses')
         .select('progress, course_id, courses(title)')
@@ -223,11 +212,9 @@
 
       const { course_id, progress, courses } = userCourse
       courseNameEl.textContent = `Ваш курс: ${courses?.title}`
-      courseGradeEl.textContent = `Оценка: —`
       progressBarEl.style.width = `${progress}%`
       progressPercentEl.textContent = `${progress}% завершено`
 
-      // Получаем уроки
       const { data: lessons } = await supabase
         .from('lessons')
         .select('id, title, order_number')
@@ -260,46 +247,20 @@
       }
     }
 
-    // Кнопки
-    document.addEventListener('DOMContentLoaded', () => {
-      document.getElementById('btnToggleLessons').addEventListener('click', () => {
-        const lessons = document.getElementById('lessons')
-        lessons.classList.toggle('active')
-        lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
-        document.getElementById('btnToggleLessons').textContent =
-          lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
-      })
-
-      document.getElementById('btnLogout').addEventListener('click', async () => {
-        await supabase.auth.signOut()
-        location.href = 'login.html'
-      })
-
-      loadDashboard()
+    document.getElementById('btnToggleLessons').addEventListener('click', () => {
+      const lessons = document.getElementById('lessons')
+      lessons.classList.toggle('active')
+      lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
+      document.getElementById('btnToggleLessons').textContent =
+        lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
     })
+
+    document.getElementById('btnLogout').addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      location.href = 'login.html'
+    })
+
+    loadDashboard()
   </script>
-  
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
