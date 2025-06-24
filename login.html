@@ -4,88 +4,131 @@
   <meta charset="UTF-8" />
   <title>Вход</title>
   <style>
-    
-     body {
+    :root {
+      font-size: 16px; /* базовая единица */
+    }
+
+    body {
       margin: 0;
-      background: #f9f9f9; /* светлый фон */
+      background: #f9f9f9;
       font-family: Arial, sans-serif;
       display: flex;
-      justify-content: center; /* по горизонтали */
-      align-items: flex-start; /* выравнивание по верху */
+      justify-content: center;
+      align-items: flex-start;
       height: 100vh;
-      padding-top: 60px; /* чуть ближе к верху */
+      padding-top: 4em;
     }
 
     .login-box {
       background: white;
       border: 1px solid #ddd;
-      border-radius: 6px;
-      padding: 30px 40px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-      width: 320px;
+      border-radius: 0.375em;
+      padding: 2em 2.5em;
+      box-shadow: 0 0.125em 0.5em rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 30em; /* примерно 320px */
       text-align: center;
+      box-sizing: border-box;
     }
 
     h1 {
       margin-top: 0;
-      margin-bottom: 25px;
+      margin-bottom: 1.5em;
       font-weight: normal;
       color: #222;
+      font-size: 1.25em;
     }
 
     input[type="email"],
     input[type="password"] {
       width: 100%;
-      padding: 10px 12px;
-      margin-bottom: 15px;
+      padding: 0.625em 0.75em;
+      margin-bottom: 1em;
       border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 15px;
+      border-radius: 0.25em;
+      font-size: 1em;
       box-sizing: border-box;
     }
 
     button#btnLogin {
       width: 100%;
-      padding: 12px 0;
-      background-color: #FFD966; /* ярко-желтый */
-      color: #241c15; /* черный */
+      padding: 0.75em 0;
+      background-color: #FFD966;
+      color: #241c15;
       border: none;
-      border-radius: 4px;
-      font-size: 16px;
+      border-radius: 0.25em;
+      font-size: 1em;
       cursor: pointer;
       font-weight: bold;
       transition: background-color 0.3s ease;
     }
 
     button#btnLogin:hover {
-      background-color: #d4b900; /* чуть темнее при наведении */
+      background-color: #d4b900;
     }
 
     #message {
-      margin-top: 15px;
+      margin-top: 1em;
       color: red;
-      min-height: 20px;
+      min-height: 1.25em;
       font-weight: 600;
+      font-size: 0.9em;
     }
 
-    
+    /* Планшет */
+    @media (max-width: 768px) {
+      body {
+        padding-top: 3em;
+      }
+
+      .login-box {
+        padding: 1.5em 2em;
+      }
+
+      h1 {
+        font-size: 1.2em;
+      }
+    }
+
+    /* Мобильный */
+    @media (max-width: 480px) {
+      body {
+        padding: 2em 1em;
+      }
+
+      .login-box {
+        border-radius: 0.25em;
+        padding: 1.5em 1.25em;
+        box-shadow: none;
+      }
+
+      input[type="email"],
+      input[type="password"],
+      button#btnLogin {
+        font-size: 0.95em;
+      }
+
+      h1 {
+        font-size: 1.1em;
+        margin-bottom: 1em;
+      }
+    }
   </style>
 </head>
 <body>
-   <div class="login-box">
-  <h1>Вход в личный кабинет</h1>
-  <input type="email" id="email" placeholder="Email" />
-  <br />
-  <input type="password" id="password" placeholder="Пароль" />
-  <br />
-  <button id="btnLogin">Войти</button>
-  <p id="message" style="color:red"></p>
-    </div>
+  <div class="login-box">
+    <h1>Вход в личный кабинет</h1>
+    <input type="email" id="email" placeholder="Email" />
+    <br />
+    <input type="password" id="password" placeholder="Пароль" />
+    <br />
+    <button id="btnLogin">Войти</button>
+    <p id="message"></p>
+  </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    // Здесь подставь свои данные из Supabase
     const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
 
@@ -110,11 +153,9 @@
       if (error) {
         msg.textContent = 'Ошибка входа: ' + error.message
       } else {
-        // Сохраняем сессию, перенаправляем в кабинет
         window.location.href = 'dashboard.html'
       }
     })
   </script>
 </body>
 </html>
-
