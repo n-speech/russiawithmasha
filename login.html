@@ -3,8 +3,76 @@
 <head>
   <meta charset="UTF-8" />
   <title>Вход</title>
+  <style>
+    
+     body {
+      margin: 0;
+      background: #f9f9f9; /* светлый фон */
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center; /* по горизонтали */
+      align-items: flex-start; /* выравнивание по верху */
+      height: 100vh;
+      padding-top: 60px; /* чуть ближе к верху */
+    }
+
+    .login-box {
+      background: white;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      padding: 30px 40px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      width: 320px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-top: 0;
+      margin-bottom: 25px;
+      font-weight: normal;
+      color: #222;
+    }
+
+    input[type="email"],
+    input[type="password"] {
+      width: 100%;
+      padding: 10px 12px;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 15px;
+      box-sizing: border-box;
+    }
+
+    button#btnLogin {
+      width: 100%;
+      padding: 12px 0;
+      background-color: #FFD966; /* ярко-желтый */
+      color: #241c15; /* черный */
+      border: none;
+      border-radius: 4px;
+      font-size: 16px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease;
+    }
+
+    button#btnLogin:hover {
+      background-color: #d4b900; /* чуть темнее при наведении */
+    }
+
+    #message {
+      margin-top: 15px;
+      color: red;
+      min-height: 20px;
+      font-weight: 600;
+    }
+
+    
+  </style>
 </head>
 <body>
+   <div class="login-box">
   <h1>Вход в личный кабинет</h1>
   <input type="email" id="email" placeholder="Email" />
   <br />
@@ -12,6 +80,7 @@
   <br />
   <button id="btnLogin">Войти</button>
   <p id="message" style="color:red"></p>
+    </div>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
@@ -48,5 +117,4 @@
   </script>
 </body>
 </html>
-
 
