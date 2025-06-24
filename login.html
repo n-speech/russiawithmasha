@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Регистрация и вход | Native Speech</title>
+</head>
+<body>
+  <h1>Регистрация и вход</h1>
+
+  <input type="email" id="email" placeholder="Email" /><br />
+  <input type="password" id="password" placeholder="Пароль" /><br />
+
+  <button onclick="signup()">Зарегистрироваться</button>
+  <button onclick="login()">Войти</button>
+
+  <p id="message"></p>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabase = createClient(
+      'https://eawveeyhkqewfhswcxmy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+
+    )
+
+    const msg = document.getElementById('message')
+
+    async function signup() {
+      msg.textContent = ''
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value
+
+      const { data, error } = await supabase.auth.signUp({ email, password })
+      if (error) {
+        msg.textContent = 'Ошибка регистрации: ' + error.message
+        return
+      }
+      msg.textContent = 'Проверьте почту для подтверждения регистрации.'
+    }
+
+    async function login() {
+      msg.textContent = ''
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value
+
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+      if (error) {
+        msg.textContent = 'Ошибка входа: ' + error.message
+        return
+      }
+
+      if (!data.user.email_confirmed_at) {
+        msg.textContent = 'Пожалуйста, подтвердите email перед входом.'
+        await supabase.auth.signOut()
+        return
+      }
+
+      location.href = 'dashboard.html'
+    }
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
