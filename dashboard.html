@@ -3,139 +3,303 @@
 <head>
   <meta charset="UTF-8" />
   <title>Личный кабинет</title>
+  
   <style>
+    /* стили из твоего готового дизайна — оставим как есть */
     body {
+      margin: 0;
+      background-color: #f9f9f9;
       font-family: Arial, sans-serif;
-      max-width: 700px;
-      margin: 20px auto;
-      padding: 0 15px;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      height: 100vh;
+      padding: 60px 20px 20px;
     }
-    h1 {
+
+    .dashboard {
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      width: 720px;
+      padding: 30px 40px;
+      box-sizing: border-box;
+    }
+
+    #welcome {
+      font-size: 22px;
+      font-weight: 600;
+      color: #241c15;
       margin-bottom: 10px;
     }
-    .course {
+
+    #courseName {
+      font-size: 18px;
+      color: #444;
+      margin-bottom: 15px;
+    }
+
+    #courseGrade {
+      font-style: italic;
+      font-size: 16px;
+      color: #666;
+      margin: 5px 0 20px 0;
+    }
+
+    .progress-label {
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 6px;
+    }
+
+    .progress-bar-container {
+      background: #eee;
+      border-radius: 10px;
+      overflow: hidden;
+      height: 22px;
+      margin-bottom: 8px;
+      width: 100%;
+    }
+
+    .progress-bar {
+      height: 100%;
+      background-color: #FFD966;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+
+    #progressPercent {
+      font-weight: 600;
+      color: #241c15;
       margin-bottom: 25px;
-      border: 1px solid #ddd;
-      padding: 15px;
-      border-radius: 6px;
-      background: #f9f9f9;
     }
-    .course h2 {
-      margin-top: 0;
+
+    .buttons {
+      display: flex;
+      gap: 15px;
+      margin-bottom: 30px;
     }
-    ul.lessons {
-      padding-left: 20px;
+
+    .buttons button {
+      flex: 1;
     }
-    ul.lessons li {
-      margin: 5px 0;
-      cursor: default;
+
+    button, .btn-lesson {
+      background-color: #FFD966;
+      color: #241c15;
+      border: none;
+      border-radius: 5px;
+      padding: 12px 20px;
+      font-weight: 700;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      width: 100%;
+      box-sizing: border-box;
+    }
+
+    #lessons {
+      display: none;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+
+    #lessons.active {
+      display: block;
+    }
+
+    #lessons-list {
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+    }
+
+    .lesson-card {
+      background: #FFFBE8;
+      border: 2px solid #F4EDDD;
+      border-radius: 8px;
+      padding: 20px 25px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-start;
+      height: 160px;
+      line-height: 1.3;
+    }
+
+    .lesson-title {
+      font-weight: 700;
+      font-size: 20px;
+      color: #241c15;
+      margin: 0 0 4px 0;
+    }
+
+    .lesson-grade {
+      font-style: italic;
+      color: #666;
+      font-size: 16px;
+      margin: 0 0 4px 0;
+    }
+
+    .lesson-status {
+      font-weight: 600;
+      font-size: 16px;
+      color: #241c15;
+      margin: 0 0 12px 0;
+    }
+
+    .lesson-status.locked::before {
+      content: '🔒 ';
+    }
+
+    .lesson-bottom {
+      margin-top: auto;
     }
   </style>
 </head>
 <body>
-  <h1>Личный кабинет</h1>
-  <p id="welcome">Загрузка...</p>
-  <button id="btnLogout">Выйти</button>
+  <div class="dashboard">
+    <div id="welcome">Загрузка...</div>
+    <div id="courseName"></div>
+    <div id="courseGrade"></div>
 
-  <div id="coursesContainer"></div>
+    <div class="progress-label">Прогресс:</div>
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    <div id="progressPercent"></div>
 
-  <script type="module">
+    <div class="buttons">
+      <button id="btnToggleLessons">Показать уроки</button>
+      <button id="btnLogout">Выйти</button>
+    </div>
+
+    <div id="lessons">
+      <div id="lessons-list"></div>
+    </div>
+  </div>
+<script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
     const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'  // ← ВСТАВЬ СВОЙ ANON KEY
     const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const welcome = document.getElementById('welcome')
-    const btnLogout = document.getElementById('btnLogout')
-    const coursesContainer = document.getElementById('coursesContainer')
-
-    btnLogout.addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      window.location.href = 'login.html'
-    })
+    const welcomeEl = document.getElementById('welcome')
+    const courseNameEl = document.getElementById('courseName')
+    const courseGradeEl = document.getElementById('courseGrade')
+    const progressBarEl = document.getElementById('progressBar')
+    const progressPercentEl = document.getElementById('progressPercent')
+    const lessonsListEl = document.getElementById('lessons-list')
 
     async function loadDashboard() {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session) {
-        window.location.href = 'login.html'
+      const { data: sessionData } = await supabase.auth.getSession()
+      const user = sessionData?.session?.user
+      if (!user) {
+        location.href = 'login.html'
         return
       }
-      const user = session.user
 
-      // Получаем имя пользователя из profiles
+      // Профиль
       const { data: profile } = await supabase
         .from('profiles')
         .select('name')
         .eq('id', user.id)
         .single()
 
-      const userName = profile?.name || user.email
-      welcome.textContent = `Добро пожаловать, ${userName}.`
+      welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
 
-      // Получаем курсы, к которым есть доступ у пользователя
-      const { data: userCourses, error } = await supabase
+      // Доступные курсы
+      const { data: userCourse } = await supabase
         .from('user_courses')
-        .select(`
-          course_id,
-          access_granted,
-          courses (
-            title,
-            description
-          )
-        `)
+        .select('progress, course_id, courses(title)')
         .eq('user_id', user.id)
         .eq('access_granted', true)
+        .maybeSingle()
 
-      if (error) {
-        coursesContainer.innerHTML = '<p>Ошибка загрузки курсов: ' + error.message + '</p>'
+      if (!userCourse) {
+        courseNameEl.textContent = 'Нет доступных курсов'
         return
       }
 
-      if (!userCourses || userCourses.length === 0) {
-        coursesContainer.innerHTML = '<p>У вас нет доступных курсов.</p>'
-        return
-      }
+      const { course_id, progress, courses } = userCourse
+      courseNameEl.textContent = `Ваш курс: ${courses?.title}`
+      courseGradeEl.textContent = `Оценка: —`
+      progressBarEl.style.width = `${progress}%`
+      progressPercentEl.textContent = `${progress}% завершено`
 
-      // Для каждого курса получаем уроки и показываем
-      for (const uc of userCourses) {
-        const course = uc.courses
-        const courseDiv = document.createElement('div')
-        courseDiv.className = 'course'
-        courseDiv.innerHTML = `<h2>${course.title}</h2>`
-        coursesContainer.appendChild(courseDiv)
+      // Получаем уроки
+      const { data: lessons } = await supabase
+        .from('lessons')
+        .select('id, title, order_number')
+        .eq('course_id', course_id)
+        .order('order_number')
 
-        // Получаем уроки курса
-        const { data: lessons, error: lessonsError } = await supabase
-          .from('lessons')
-          .select('id, title, order_number')
-          .eq('course_id', uc.course_id)
-          .order('order_number')
+      for (const lesson of lessons) {
+        const { data: userLesson } = await supabase
+          .from('user_lessons')
+          .select('grade, access')
+          .eq('lesson_id', lesson.id)
+          .eq('user_id', user.id)
+          .maybeSingle()
 
-        if (lessonsError) {
-          courseDiv.innerHTML += `<p>Ошибка загрузки уроков: ${lessonsError.message}</p>`
-          continue
-        }
+        const grade = userLesson?.grade || '—'
+        const access = userLesson?.access ? 'Открыт' : 'Закрыт'
+        const lockedClass = userLesson?.access ? '' : 'locked'
 
-        if (!lessons || lessons.length === 0) {
-          courseDiv.innerHTML += '<p>Уроки отсутствуют</p>'
-          continue
-        }
-
-        const ul = document.createElement('ul')
-        ul.className = 'lessons'
-
-        lessons.forEach(lesson => {
-          const li = document.createElement('li')
-          li.textContent = `${lesson.order_number}. ${lesson.title}`
-          ul.appendChild(li)
-        })
-
-        courseDiv.appendChild(ul)
+        const lessonCard = document.createElement('div')
+        lessonCard.className = 'lesson-card'
+        lessonCard.innerHTML = `
+          <div class="lesson-title">${lesson.title}</div>
+          <div class="lesson-grade">Оценка: ${grade}</div>
+          <div class="lesson-status ${lockedClass}">Статус: ${access}</div>
+          <div class="lesson-bottom">
+            <button class="btn-lesson">Перейти к уроку</button>
+          </div>
+        `
+        lessonsListEl.appendChild(lessonCard)
       }
     }
 
-    loadDashboard()
+    // Кнопки
+    document.addEventListener('DOMContentLoaded', () => {
+      document.getElementById('btnToggleLessons').addEventListener('click', () => {
+        const lessons = document.getElementById('lessons')
+        lessons.classList.toggle('active')
+        lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
+        document.getElementById('btnToggleLessons').textContent =
+          lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
+      })
+
+      document.getElementById('btnLogout').addEventListener('click', async () => {
+        await supabase.auth.signOut()
+        location.href = 'login.html'
+      })
+
+      loadDashboard()
+    })
   </script>
+  
 </body>
 </html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
