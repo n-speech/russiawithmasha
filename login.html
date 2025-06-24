@@ -2,41 +2,51 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Вход | Native Speech</title>
+  <title>Вход</title>
 </head>
 <body>
-  <h1>Вход в кабинет</h1>
-
-  <input type="email" id="email" placeholder="Email" /><br />
-  <input type="password" id="password" placeholder="Пароль" /><br />
-
-  <button onclick="login()">Войти</button>
-  <p id="msg"></p>
+  <h1>Вход в личный кабинет</h1>
+  <input type="email" id="email" placeholder="Email" />
+  <br />
+  <input type="password" id="password" placeholder="Пароль" />
+  <br />
+  <button id="btnLogin">Войти</button>
+  <p id="message" style="color:red"></p>
 
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const supabase = createClient(
-      'https://eawveeyhkqewfhswcxmy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-    )
+    // Здесь подставь свои данные из Supabase
+    const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
 
-    const msg = document.getElementById('msg')
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
-    async function login() {
+    const btnLogin = document.getElementById('btnLogin')
+    const msg = document.getElementById('message')
+
+    btnLogin.addEventListener('click', async () => {
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value.trim()
+
       msg.textContent = ''
-      const email = document.getElementById('email').value
-      const password = document.getElementById('password').value
+
+      if (!email || !password) {
+        msg.textContent = 'Пожалуйста, введите email и пароль'
+        return
+      }
 
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
         msg.textContent = 'Ошибка входа: ' + error.message
-        return
+      } else {
+        // Сохраняем сессию, перенаправляем в кабинет
+        window.location.href = 'dashboard.html'
       }
-
-      location.href = 'dashboard.html'
-    }
+    })
   </script>
 </body>
 </html>
+
+
