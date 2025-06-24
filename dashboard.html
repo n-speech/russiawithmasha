@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -18,59 +16,53 @@
     const supabase = createClient(
       'https://eawveeyhkqewfhswcxmy.supabase.co',
       'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-   
     )
 
-    async function loadData() {
-      const { data: session } = await supabase.auth.getSession()
-      const user = session?.session?.user
-      if (!user) {
-        location.href = 'login.html'
-        return
-      }
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+    if (!user) {
+      location.href = 'login.html'
+    }
 
-      if (!user.email_confirmed_at) {
-        alert('Пожалуйста, подтвердите email для доступа.')
-        await supabase.auth.signOut()
-        location.href = 'login.html'
-        return
-      }
+    // Получаем имя пользователя из таблицы profiles
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
 
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('name')
-        .eq('id', user.id)
-        .single()
+    document.getElementById('welcome').textContent =
+      'Привет, ' + (profile?.name || 'ученик') + '!'
 
-      document.getElementById('welcome').textContent = 'Привет, ' + (profile?.name || 'ученик') + '!'
+    // Получаем доступные курсы
+    const { data: userCourses } = await supabase
+      .from('user_courses')
+      .select('course_id, courses(title)')
+      .eq('user_id', user.id)
+      .eq('access_granted', true)
 
-      const { data: userCourses } = await supabase
-        .from('user_courses')
-        .select('course_id, courses(title)')
-        .eq('user_id', user.id)
-        .eq('access_granted', true)
+    const courseList = document.getElementById('courses')
 
-      const courseList = document.getElementById('courses')
-      if (!userCourses.length) {
-        courseList.innerHTML = '<p>Нет доступных курсов.</p>'
-      } else {
-        for (const entry of userCourses) {
-          const courseId = entry.course_id
-          const title = entry.courses.title
+    if (!userCourses || userCourses.length === 0) {
+      courseList.innerHTML = '<p>Нет доступных курсов.</p>'
+    } else {
+      for (const entry of userCourses) {
+        const courseId = entry.course_id
+        const title = entry.courses.title
 
-          const { data: lessons } = await supabase
-            .from('lessons')
-            .select('title, order_number')
-            .eq('course_id', courseId)
-            .order('order_number')
+        // Получаем уроки курса
+        const { data: lessons } = await supabase
+          .from('lessons')
+          .select('title, order_number')
+          .eq('course_id', courseId)
+          .order('order_number')
 
-          const courseDiv = document.createElement('div')
-          courseDiv.innerHTML =
-            `<h2>${title}</h2><ul>` +
-            lessons.map((lesson) => `<li>${lesson.title}</li>`).join('') +
-            '</ul>'
-          courseList.appendChild(courseDiv)
-        }
+        const courseDiv = document.createElement('div')
+        courseDiv.innerHTML =
+          `<h2>${title}</h2><ul>` +
+          lessons.map((lesson) => `<li>${lesson.title}</li>`).join('') +
+          '</ul>'
+        courseList.appendChild(courseDiv)
       }
     }
 
@@ -78,13 +70,6 @@
       await supabase.auth.signOut()
       location.href = 'login.html'
     }
-
-    loadData()
   </script>
 </body>
 </html>
-
-
-
-
-
