@@ -33,22 +33,23 @@
       color: #241c15;
       margin-bottom: 0.625rem;
     }
-    #coursesList {
+    #courses-list {
       margin-bottom: 1rem;
       display: flex;
-      gap: 0.75rem;
       flex-wrap: wrap;
+      gap: 0.5rem;
     }
     .course-btn {
       background-color: #FFD966;
-      color: #241c15;
       border: none;
       border-radius: 0.3125rem;
       padding: 0.5rem 1rem;
       font-weight: 700;
-      font-size: 1rem;
       cursor: pointer;
       transition: background-color 0.3s ease;
+      flex: 1 1 auto;
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .course-btn.active {
       background-color: #f3f7a3;
@@ -57,6 +58,7 @@
       font-size: 1.125rem;
       color: #444;
       margin-bottom: 1rem;
+      min-height: 1.5rem;
     }
     .progress-label {
       font-weight: 600;
@@ -192,7 +194,7 @@
 <body>
   <div class="dashboard">
     <div id="welcome">Загрузка...</div>
-    <div id="coursesList"></div>
+    <div id="courses-list"></div>
     <div id="courseName"></div>
 
     <div class="progress-label">Прогресс</div>
@@ -219,7 +221,7 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const welcomeEl = document.getElementById('welcome')
-const coursesListEl = document.getElementById('coursesList')
+const coursesListEl = document.getElementById('courses-list')
 const courseNameEl = document.getElementById('courseName')
 const progressBarEl = document.getElementById('progressBar')
 const progressPercentEl = document.getElementById('progressPercent')
@@ -229,7 +231,6 @@ const btnLogout = document.getElementById('btnLogout')
 const lessonsContainer = document.getElementById('lessons')
 
 let currentCourse = null
-let userLessons = []
 
 async function getSession() {
   try {
@@ -277,18 +278,17 @@ async function loadUserCourses(userId) {
   }
 }
 
-async function loadCourse(courseId) {
+async function loadCourseTitles(courseIds) {
   try {
     const { data, error } = await supabase
       .from('courses')
-      .select('title')
-      .eq('id', courseId)
-      .single()
+      .select('id, title')
+      .in('id', courseIds)
     if (error) throw error
-    return data
+    return data || []
   } catch (error) {
-    console.error('Ошибка загрузки названия курса:', error)
-    return null
+    console.error('Ошибка загрузки названий курсов:', error)
+    return []
   }
 }
 
@@ -335,7 +335,7 @@ function renderCourses(courses) {
   }
   courses.forEach((course, index) => {
     const btn = document.createElement('button')
-    btn.textContent = `Курс ${course.course_id} (${course.progress}%)`
+    btn.textContent = `${course.title} (${course.progress}%)`
     btn.className = 'course-btn'
     if (index === 0) {
       btn.classList.add('active')
@@ -350,20 +350,6 @@ function renderCourses(courses) {
     })
     coursesListEl.appendChild(btn)
   })
-}
-
-async function loadCourseData(course) {
-  const courseData = await loadCourse(course.course_id)
-  courseNameEl.textContent = `Ваш курс: ${courseData?.title ?? 'Без названия'}`
-  renderProgress(course.progress)
-
-  const lessons = await loadLessons(course.course_id)
-  userLessons = await loadUserLessons(user.id)
-
-  renderLessons(lessons, userLessons)
-  lessonsContainer.classList.remove('active')
-  lessonsContainer.style.display = 'none'
-  btnToggleLessons.textContent = 'Показать уроки'
 }
 
 function renderLessons(lessons, userLessons) {
@@ -395,15 +381,9 @@ function renderLessons(lessons, userLessons) {
 }
 
 btnToggleLessons.addEventListener('click', () => {
-  if (lessonsContainer.classList.contains('active')) {
-    lessonsContainer.classList.remove('active')
-    lessonsContainer.style.display = 'none'
-    btnToggleLessons.textContent = 'Показать уроки'
-  } else {
-    lessonsContainer.classList.add('active')
-    lessonsContainer.style.display = 'block'
-    btnToggleLessons.textContent = 'Скрыть уроки'
-  }
+  lessonsContainer.classList.toggle('active')
+  lessonsContainer.style.display = lessonsContainer.classList.contains('active') ? 'block' : 'none'
+  btnToggleLessons.textContent = lessonsContainer.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
 })
 
 btnLogout.addEventListener('click', async () => {
@@ -411,7 +391,17 @@ btnLogout.addEventListener('click', async () => {
   location.href = 'login.html'
 })
 
-let user = null
+async function loadCourseData(course) {
+  courseNameEl.textContent = `Ваш курс: ${course.title}`
+  renderProgress(course.progress)
+
+  const lessons = await loadLessons(course.course_id)
+  const userLessons = await loadUserLessons(currentUser.id)
+  renderLessons(lessons, userLessons)
+}
+
+let currentUser = null
+
 async function loadDashboard() {
   welcomeEl.textContent = 'Загрузка...'
   courseNameEl.textContent = ''
@@ -419,23 +409,34 @@ async function loadDashboard() {
   lessonsListEl.innerHTML = ''
   coursesListEl.innerHTML = ''
 
-  user = await getSession()
-  if (!user) return
+  currentUser = await getSession()
+  if (!currentUser) return
 
-  const profile = await loadProfile(user.id)
+  const profile = await loadProfile(currentUser.id)
   welcomeEl.textContent = `Добро пожаловать, ${profile?.name ?? 'ученик'}!`
 
-  const userCourses = await loadUserCourses(user.id)
+  const userCourses = await loadUserCourses(currentUser.id)
   if (!userCourses.length) {
-    courseNameEl.textContent = 'У вас нет доступных курсов'
+    coursesListEl.textContent = 'У вас нет доступных курсов'
+    courseNameEl.textContent = ''
     renderProgress(0)
     return
   }
 
+  const courseIds = userCourses.map(c => c.course_id)
+  const courseTitles = await loadCourseTitles(courseIds)
+
+  // Добавляем названия в userCourses
+  for (const userCourse of userCourses) {
+    const courseInfo = courseTitles.find(c => c.id === userCourse.course_id)
+    userCourse.title = courseInfo?.title ?? 'Без названия'
+  }
+
   renderCourses(userCourses)
 
-  // Загружаем данные первого курса
-  await loadCourseData(userCourses[0])
+  // Загрузка данных для первого курса по умолчанию
+  currentCourse = userCourses[0]
+  await loadCourseData(currentCourse)
 }
 
 loadDashboard()
