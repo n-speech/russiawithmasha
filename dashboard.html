@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -6,330 +7,310 @@
   <title>Личный кабинет</title>
   <style>
     :root {
-      font-size: 16px;
+  font-size: 16px;
+}
+
+body {
+  margin: 0;
+  background-color: #f9f9f9;
+  font-family: Arial, sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  padding: 4rem 1rem 2rem;
+}
+
+.dashboard {
+  background: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 45rem; /* ~720px */
+  padding: 2rem 2.5rem;
+  box-sizing: border-box;
+}
+
+#welcome {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: #241c15;
+  margin-bottom: 0.625rem;
+}
+
+#courseName {
+  font-size: 1.125rem;
+  color: #444;
+  margin-bottom: 1rem;
+}
+
+.progress-label {
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 0.375rem;
+}
+
+.progress-bar-container {
+  background: lightgrey;
+  border-radius: 0.625rem;
+  overflow: hidden;
+  height: 1.375rem;
+  margin-bottom: 0.5rem;
+  width: 100%;
+}
+
+.progress-bar {
+  height: 100%;
+  background-color: #FFD966;
+  width: 0%;
+  transition: width 0.5s ease;
+}
+
+#progressPercent {
+  font-weight: 600;
+  color: #241c15;
+  margin-bottom: 1.5rem;
+}
+
+.buttons {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.buttons button {
+  flex: 1;
+}
+
+button, .btn-lesson {
+  background-color: #FFD966;
+  color: #241c15;
+  border: none;
+  border-radius: 0.3125rem;
+  padding: 0.75rem 1.25rem;
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 33%;
+  box-sizing: border-box;
+}
+
+.btn-lesson.disabled {
+  background-color: #f3f7a3;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+#lessons {
+  display: none;
+  border-top: 1px solid #ddd;
+  padding-top: 1.25rem;
+}
+
+#lessons.active {
+  display: block;
+}
+
+#lessons-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.lesson-card {
+  background: #FFFBE8;
+  border: 2px solid #F4EDDD;
+  border-radius: 0.5rem;
+  padding: 1.25rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  min-height: 7.5rem;
+  line-height: 1.3;
+}
+
+.lesson-title {
+  font-weight: 700;
+  font-size: 1.25rem;
+  color: #241c15;
+  margin: 0 0 0.25rem 0;
+}
+
+.lesson-grade {
+  font-style: italic;
+  color: #4e9c5d;
+  font-size: 1rem;
+  margin: 0 0 0.25rem 0;
+}
+
+.lesson-bottom {
+  margin-top: auto;
+}
+
+/* Планшет */
+@media (max-width: 900px) {
+  .dashboard {
+    padding: 1.5rem;
+  }
+
+  .btn-lesson {
+    width: 50%;
+  }
+
+  .lesson-title {
+    font-size: 1.125rem;
+  }
+
+  #welcome, #courseName {
+    font-size: 1.25rem;
+  }
+}
+
+/* Мобильный */
+@media (max-width: 600px) {
+  body {
+    padding: 2rem 1rem;
+  }
+
+  .dashboard {
+    padding: 1.5rem 1rem;
+    border-radius: 0;
+    box-shadow: none;
+  }
+
+  .buttons {
+    flex-direction: column-reverse;
+    gap: 0.75rem;
+  }
+
+  button, .btn-lesson {
+    width: 100%;
+    font-size: 1rem;
+    padding: 0.75rem;
+  }
+
+  .lesson-card {
+    padding: 1rem;
+    min-height: auto;
+  }
+
+  .lesson-title, .lesson-grade {
+    font-size: 1.1rem;
+  }
+}
+
+ <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+  const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+  const supabase = createClient(supabaseUrl, supabaseKey)
+
+  const welcomeEl = document.getElementById('welcome')
+  const courseNameEl = document.getElementById('courseName')
+  const progressBarEl = document.getElementById('progressBar')
+  const progressPercentEl = document.getElementById('progressPercent')
+  const lessonsListEl = document.getElementById('lessons-list')
+
+  async function loadDashboard() {
+    let sessionData = null
+    let user = null
+
+    // Пробуем дождаться сессии
+    for (let i = 0; i < 10; i++) {
+      const sessionResponse = await supabase.auth.getSession()
+      sessionData = sessionResponse.data
+      user = sessionData?.session?.user
+      if (user) break
+      await new Promise((r) => setTimeout(r, 200))
     }
 
-    body {
-      margin: 0;
-      background-color: #f9f9f9;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 4rem 1rem 2rem;
+    if (!user) {
+      location.href = 'login.html'
+      return
     }
 
-    .dashboard {
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 45rem;
-      padding: 2rem 2.5rem;
-      box-sizing: border-box;
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
+
+    welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
+
+    const { data: userCourse } = await supabase
+      .from('user_courses')
+      .select('progress, course_id, courses(title)')
+      .eq('user_id', user.id)
+      .eq('access_granted', true)
+      .maybeSingle()
+
+    if (!userCourse) {
+      courseNameEl.textContent = 'Нет доступных курсов'
+      return
     }
 
-    #welcome {
-      font-size: 1.375rem;
-      font-weight: 600;
-      color: #241c15;
-      margin-bottom: 0.625rem;
-    }
+    const { course_id, progress, courses } = userCourse
+    courseNameEl.textContent = `Ваш курс: ${courses?.title}`
+    progressBarEl.style.width = `${progress}%`
+    progressPercentEl.textContent = `${progress}% завершено`
 
-    #courseName {
-      font-size: 1.125rem;
-      color: #444;
-      margin-bottom: 1rem;
-    }
+    const { data: lessons } = await supabase
+      .from('lessons')
+      .select('id, title, order_number')
+      .eq('course_id', course_id)
+      .order('order_number')
 
-    .progress-label {
-      font-weight: 600;
-      color: #333;
-      margin-bottom: 0.375rem;
-    }
+    for (const lesson of lessons) {
+      const { data: userLesson } = await supabase
+        .from('user_lessons')
+        .select('grade, access')
+        .eq('lesson_id', lesson.id)
+        .eq('user_id', user.id)
+        .maybeSingle()
 
-    .progress-bar-container {
-      background: lightgrey;
-      border-radius: 0.625rem;
-      overflow: hidden;
-      height: 1.375rem;
-      margin-bottom: 0.5rem;
-      width: 100%;
-    }
+      const grade = userLesson?.grade || '—'
+      const isLocked = !userLesson?.access
+      const buttonText = isLocked ? 'Недоступен 🔒' : 'Перейти к уроку'
+      const buttonClass = isLocked ? 'btn-lesson disabled' : 'btn-lesson'
 
-    .progress-bar {
-      height: 100%;
-      background-color: #FFD966;
-      width: 0%;
-      transition: width 0.5s ease;
-    }
+      const lessonCard = document.createElement('div')
+      lessonCard.className = 'lesson-card'
+      lessonCard.innerHTML = `
+        <div class="lesson-title">${lesson.title}</div>
+        <div class="lesson-grade">Оценка: ${grade}</div>
+        <div class="lesson-bottom">
+          <button class="${buttonClass}">${buttonText}</button>
+        </div>
+      `
 
-    #progressPercent {
-      font-weight: 600;
-      color: #241c15;
-      margin-bottom: 1.5rem;
-    }
-
-    .buttons {
-      display: flex;
-      gap: 1rem;
-      margin-bottom: 2rem;
-    }
-
-    .buttons button {
-      flex: 1;
-    }
-
-    button, .btn-lesson {
-      background-color: #FFD966;
-      color: #241c15;
-      border: none;
-      border-radius: 0.3125rem;
-      padding: 0.75rem 1.25rem;
-      font-weight: 700;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background-color 0.3s ease;
-      width: 33%;
-      box-sizing: border-box;
-    }
-
-    .btn-lesson.disabled {
-      background-color: #f3f7a3;
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    #lessons {
-      display: none;
-      border-top: 1px solid #ddd;
-      padding-top: 1.25rem;
-    }
-
-    #lessons.active {
-      display: block;
-    }
-
-    #lessons-list {
-      display: flex;
-      flex-direction: column;
-      gap: 1rem;
-    }
-
-    .lesson-card {
-      background: #FFFBE8;
-      border: 2px solid #F4EDDD;
-      border-radius: 0.5rem;
-      padding: 1.25rem 1.5rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: flex-start;
-      min-height: 7.5rem;
-      line-height: 1.3;
-    }
-
-    .lesson-title {
-      font-weight: 700;
-      font-size: 1.25rem;
-      color: #241c15;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .lesson-grade {
-      font-style: italic;
-      color: #4e9c5d;
-      font-size: 1rem;
-      margin: 0 0 0.25rem 0;
-    }
-
-    .lesson-bottom {
-      margin-top: auto;
-    }
-
-    @media (max-width: 900px) {
-      .dashboard {
-        padding: 1.5rem;
+      if (!isLocked) {
+        const button = lessonCard.querySelector('.btn-lesson')
+        button.addEventListener('click', () => {
+          window.location.href = `lesson.html?id=${lesson.id}`
+        })
       }
 
-      .btn-lesson {
-        width: 50%;
-      }
-
-      .lesson-title {
-        font-size: 1.125rem;
-      }
-
-      #welcome, #courseName {
-        font-size: 1.25rem;
-      }
+      lessonsListEl.appendChild(lessonCard)
     }
+  }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 2rem 1rem;
-      }
+  document.getElementById('btnToggleLessons').addEventListener('click', () => {
+    const lessons = document.getElementById('lessons')
+    lessons.classList.toggle('active')
+    lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
+    document.getElementById('btnToggleLessons').textContent =
+      lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
+  })
 
-      .dashboard {
-        padding: 1.5rem 1rem;
-        border-radius: 0;
-        box-shadow: none;
-      }
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    await supabase.auth.signOut()
+    location.href = 'login.html'
+  })
 
-      .buttons {
-        flex-direction: column-reverse;
-        gap: 0.75rem;
-      }
+  loadDashboard()
+</script>
 
-      button, .btn-lesson {
-        width: 100%;
-        font-size: 1rem;
-        padding: 0.75rem;
-      }
-
-      .lesson-card {
-        padding: 1rem;
-        min-height: auto;
-      }
-
-      .lesson-title, .lesson-grade {
-        font-size: 1.1rem;
-      }
-    }
-  </style>
-</head>
-<body>
-  <div class="dashboard">
-    <div id="welcome">Загрузка...</div>
-    <div id="courseName"></div>
-
-    <div class="progress-label">Прогресс по курсу:</div>
-    <div class="progress-bar-container">
-      <div id="progressBar" class="progress-bar"></div>
-    </div>
-    <div id="progressPercent"></div>
-
-    <div class="buttons">
-      <button id="btnToggleLessons">Показать уроки</button>
-      <button id="btnLogout">Выйти</button>
-    </div>
-
-    <div id="lessons">
-      <div id="lessons-list"></div>
-    </div>
-  </div>
-
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-    const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    window.addEventListener('DOMContentLoaded', () => {
-      const welcomeEl = document.getElementById('welcome')
-      const courseNameEl = document.getElementById('courseName')
-      const progressBarEl = document.getElementById('progressBar')
-      const progressPercentEl = document.getElementById('progressPercent')
-      const lessonsListEl = document.getElementById('lessons-list')
-
-      async function loadDashboard() {
-        let sessionData = null
-        let user = null
-
-        for (let i = 0; i < 10; i++) {
-          const sessionResponse = await supabase.auth.getSession()
-          sessionData = sessionResponse.data
-          user = sessionData?.session?.user
-          if (user) break
-          await new Promise((r) => setTimeout(r, 200))
-        }
-
-        if (!user) {
-          location.href = 'login.html'
-          return
-        }
-
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('name')
-          .eq('id', user.id)
-          .single()
-
-        welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
-
-        const { data: userCourse } = await supabase
-          .from('user_courses')
-          .select('progress, course_id, courses(title)')
-          .eq('user_id', user.id)
-          .eq('access_granted', true)
-          .maybeSingle()
-
-        if (!userCourse) {
-          courseNameEl.textContent = 'Нет доступных курсов'
-          return
-        }
-
-        const { course_id, progress, courses } = userCourse
-        courseNameEl.textContent = `Ваш курс: ${courses?.title}`
-        progressBarEl.style.width = `${progress}%`
-        progressPercentEl.textContent = `${progress}% завершено`
-
-        const { data: lessons } = await supabase
-          .from('lessons')
-          .select('id, title, order_number')
-          .eq('course_id', course_id)
-          .order('order_number')
-
-        for (const lesson of lessons) {
-          const { data: userLesson } = await supabase
-            .from('user_lessons')
-            .select('grade, access')
-            .eq('lesson_id', lesson.id)
-            .eq('user_id', user.id)
-            .maybeSingle()
-
-          const grade = userLesson?.grade || '—'
-          const isLocked = !userLesson?.access
-          const buttonText = isLocked ? 'Недоступен 🔒' : 'Перейти к уроку'
-          const buttonClass = isLocked ? 'btn-lesson disabled' : 'btn-lesson'
-
-          const lessonCard = document.createElement('div')
-          lessonCard.className = 'lesson-card'
-          lessonCard.innerHTML = `
-            <div class="lesson-title">${lesson.title}</div>
-            <div class="lesson-grade">Оценка: ${grade}</div>
-            <div class="lesson-bottom">
-              <button class="${buttonClass}">${buttonText}</button>
-            </div>
-          `
-
-          if (!isLocked) {
-            const button = lessonCard.querySelector('.btn-lesson')
-            button.addEventListener('click', () => {
-              window.location.href = `lesson.html?id=${lesson.id}`
-            })
-          }
-
-          lessonsListEl.appendChild(lessonCard)
-        }
-      }
-
-      document.getElementById('btnToggleLessons').addEventListener('click', () => {
-        const lessons = document.getElementById('lessons')
-        lessons.classList.toggle('active')
-        lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
-        document.getElementById('btnToggleLessons').textContent =
-          lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
-      })
-
-      document.getElementById('btnLogout').addEventListener('click', async () => {
-        await supabase.auth.signOut()
-        location.href = 'login.html'
-      })
-
-      loadDashboard()
-    })
-  </script>
 </body>
 </html>
