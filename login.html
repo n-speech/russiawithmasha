@@ -143,55 +143,52 @@
 
     const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-
     const supabase = createClient(supabaseUrl, supabaseKey)
 
     const btnLogin = document.getElementById('btnLogin')
     const msg = document.getElementById('message')
 
     btnLogin.addEventListener('click', async () => {
-  const email = document.getElementById('email').value.trim()
-  const password = document.getElementById('password').value.trim()
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value.trim()
 
-  msg.textContent = ''
+      msg.textContent = ''
 
-  if (!email || !password) {
-    msg.textContent = 'Пожалуйста, введите email и пароль'
-    return
-  }
+      if (!email || !password) {
+        msg.textContent = 'Пожалуйста, введите email и пароль'
+        return
+      }
 
-  const { data: authData, error } = await supabase.auth.signInWithPassword({
-    email,
-    password
-  })
+      const { data: authData, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      })
 
-  if (error) {
-    msg.textContent = 'Ошибка входа: ' + error.message
-    return
-  }
+      if (error) {
+        msg.textContent = 'Ошибка входа: ' + error.message
+        return
+      }
 
-  const user = authData.user
+      const user = authData.user
 
-  // Получаем роль из таблицы profiles
-  const { data: profile, error: profileError } = await supabase
-    .from('profiles')
-    .select('role')
-    .eq('id', user.id)
-    .single()
+      // Получаем роль из profiles
+      const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .single()
 
-  if (profileError) {
-    msg.textContent = 'Ошибка загрузки профиля'
-    return
-  }
+      if (profileError || !profile) {
+        msg.textContent = 'Профиль не найден. Обратитесь к администратору.'
+        return
+      }
 
-  // Перенаправляем по роли
-  if (profile?.role === 'teacher') {
-    window.location.href = 'admin.html'
-  } else {
-    window.location.href = 'dashboard.html'
-  }
-})
-
+      if (profile.role === 'teacher') {
+        window.location.href = 'admin.html'
+      } else {
+        window.location.href = 'dashboard.html'
+      }
+    })
   </script>
 </body>
 </html>
