@@ -8,7 +8,6 @@
     :root {
       font-size: 16px;
     }
-
     body {
       margin: 0;
       background-color: #f9f9f9;
@@ -19,36 +18,31 @@
       min-height: 100vh;
       padding: 4rem 1rem 2rem;
     }
-
     .dashboard {
       background: white;
       border-radius: 0.5rem;
       box-shadow: 0 0.125rem 0.625rem rgba(0, 0, 0, 0.1);
       width: 100%;
-      max-width: 45rem; /* ~720px */
+      max-width: 45rem;
       padding: 2rem 2.5rem;
       box-sizing: border-box;
     }
-
     #welcome {
       font-size: 1.375rem;
       font-weight: 600;
       color: #241c15;
       margin-bottom: 0.625rem;
     }
-
     #courseName {
       font-size: 1.125rem;
       color: #444;
       margin-bottom: 1rem;
     }
-
     .progress-label {
       font-weight: 600;
       color: #333;
       margin-bottom: 0.375rem;
     }
-
     .progress-bar-container {
       background: lightgrey;
       border-radius: 0.625rem;
@@ -57,30 +51,25 @@
       margin-bottom: 0.5rem;
       width: 100%;
     }
-
     .progress-bar {
       height: 100%;
       background-color: #FFD966;
       width: 0%;
       transition: width 0.5s ease;
     }
-
     #progressPercent {
       font-weight: 600;
       color: #241c15;
       margin-bottom: 1.5rem;
     }
-
     .buttons {
       display: flex;
       gap: 1rem;
       margin-bottom: 2rem;
     }
-
     .buttons button {
       flex: 1;
     }
-
     button, .btn-lesson {
       background-color: #FFD966;
       color: #241c15;
@@ -94,29 +83,24 @@
       width: 33%;
       box-sizing: border-box;
     }
-
     .btn-lesson.disabled {
       background-color: #f3f7a3;
       cursor: not-allowed;
       opacity: 0.6;
     }
-
     #lessons {
       display: none;
       border-top: 1px solid #ddd;
       padding-top: 1.25rem;
     }
-
     #lessons.active {
       display: block;
     }
-
     #lessons-list {
       display: flex;
       flex-direction: column;
       gap: 1rem;
     }
-
     .lesson-card {
       background: #FFFBE8;
       border: 2px solid #F4EDDD;
@@ -128,72 +112,57 @@
       min-height: 7.5rem;
       line-height: 1.3;
     }
-
     .lesson-title {
       font-weight: 700;
       font-size: 1.25rem;
       color: #241c15;
       margin: 0 0 0.25rem 0;
     }
-
     .lesson-grade {
       font-style: italic;
       color: #4e9c5d;
       font-size: 1rem;
       margin: 0 0 0.25rem 0;
     }
-
     .lesson-bottom {
       margin-top: auto;
     }
-
-    /* Планшет */
     @media (max-width: 900px) {
       .dashboard {
         padding: 1.5rem;
       }
-
       .btn-lesson {
         width: 50%;
       }
-
       .lesson-title {
         font-size: 1.125rem;
       }
-
       #welcome, #courseName {
         font-size: 1.25rem;
       }
     }
-
-    /* Мобильный */
     @media (max-width: 600px) {
       body {
         padding: 2rem 1rem;
       }
-
       .dashboard {
         padding: 1.5rem 1rem;
         border-radius: 0;
         box-shadow: none;
       }
-
       .buttons {
         flex-direction: column-reverse;
         gap: 0.75rem;
       }
-
       button, .btn-lesson {
         width: 100%;
         font-size: 1rem;
         padding: 0.75rem;
       }
-
       .lesson-card {
         padding: 1rem;
         min-height: auto;
       }
-
       .lesson-title, .lesson-grade {
         font-size: 1.1rem;
       }
@@ -270,14 +239,29 @@ async function loadUserCourse(userId) {
   try {
     const { data, error } = await supabase
       .from('user_courses')
-      .select('progress, course_id, courses(title)')
+      .select('progress, course_id')
       .eq('user_id', userId)
       .eq('access_granted', true)
-      .maybeSingle()  // или single(), если уверена, что ровно одна запись
+      .maybeSingle()
     if (error) throw error
     return data
   } catch (error) {
     console.error('Ошибка загрузки курса:', error)
+    return null
+  }
+}
+
+async function loadCourse(courseId) {
+  try {
+    const { data, error } = await supabase
+      .from('courses')
+      .select('title')
+      .eq('id', courseId)
+      .single()
+    if (error) throw error
+    return data
+  } catch (error) {
+    console.error('Ошибка загрузки названия курса:', error)
     return null
   }
 }
@@ -376,18 +360,22 @@ async function loadDashboard() {
     return
   }
 
-  courseNameEl.textContent = `Ваш курс: ${userCourse.courses?.title ?? 'Без названия'}`
+  // Загружаем название курса отдельно
+  const courseData = await loadCourse(userCourse.course_id)
+  courseNameEl.textContent = `Ваш курс: ${courseData?.title ?? 'Без названия'}`
   renderProgress(userCourse.progress)
 
   const lessons = await loadLessons(userCourse.course_id)
   const userLessons = await loadUserLessons(user.id)
+
+  console.log('Уроки:', lessons)
+  console.log('Статусы уроков:', userLessons)
 
   renderLessons(lessons, userLessons)
 }
 
 loadDashboard()
 </script>
-
 
 </body>
 </html>
