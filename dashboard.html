@@ -33,6 +33,26 @@
       color: #241c15;
       margin-bottom: 0.625rem;
     }
+    #coursesList {
+      margin-bottom: 1rem;
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .course-btn {
+      background-color: #FFD966;
+      color: #241c15;
+      border: none;
+      border-radius: 0.3125rem;
+      padding: 0.5rem 1rem;
+      font-weight: 700;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    .course-btn.active {
+      background-color: #f3f7a3;
+    }
     #courseName {
       font-size: 1.125rem;
       color: #444;
@@ -172,6 +192,7 @@
 <body>
   <div class="dashboard">
     <div id="welcome">Загрузка...</div>
+    <div id="coursesList"></div>
     <div id="courseName"></div>
 
     <div class="progress-label">Прогресс</div>
@@ -198,12 +219,17 @@ const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 const welcomeEl = document.getElementById('welcome')
+const coursesListEl = document.getElementById('coursesList')
 const courseNameEl = document.getElementById('courseName')
 const progressBarEl = document.getElementById('progressBar')
 const progressPercentEl = document.getElementById('progressPercent')
 const lessonsListEl = document.getElementById('lessons-list')
 const btnToggleLessons = document.getElementById('btnToggleLessons')
 const btnLogout = document.getElementById('btnLogout')
+const lessonsContainer = document.getElementById('lessons')
+
+let currentCourse = null
+let userLessons = []
 
 async function getSession() {
   try {
@@ -235,22 +261,21 @@ async function loadProfile(userId) {
   }
 }
 
-async function loadUserCourse(userId) {
+async function loadUserCourses(userId) {
   try {
     const { data, error } = await supabase
       .from('user_courses')
       .select('progress, course_id')
       .eq('user_id', userId)
-      .eq('access', true)  // заменено с access_granted
-      .maybeSingle()
+      .eq('access', true)
+
     if (error) throw error
-    return data
+    return data  // массив курсов
   } catch (error) {
-    console.error('Ошибка загрузки курса:', error)
-    return null
+    console.error('Ошибка загрузки курсов:', error)
+    return []
   }
 }
-
 
 async function loadCourse(courseId) {
   try {
@@ -302,6 +327,45 @@ function renderProgress(progress) {
   progressPercentEl.textContent = `${prog}% завершено`
 }
 
+function renderCourses(courses) {
+  coursesListEl.innerHTML = ''
+  if (!courses.length) {
+    coursesListEl.textContent = 'У вас нет доступных курсов'
+    return
+  }
+  courses.forEach((course, index) => {
+    const btn = document.createElement('button')
+    btn.textContent = `Курс ${course.course_id} (${course.progress}%)`
+    btn.className = 'course-btn'
+    if (index === 0) {
+      btn.classList.add('active')
+      currentCourse = course
+    }
+    btn.addEventListener('click', async () => {
+      if (currentCourse.course_id === course.course_id) return
+      currentCourse = course
+      Array.from(coursesListEl.children).forEach(b => b.classList.remove('active'))
+      btn.classList.add('active')
+      await loadCourseData(course)
+    })
+    coursesListEl.appendChild(btn)
+  })
+}
+
+async function loadCourseData(course) {
+  const courseData = await loadCourse(course.course_id)
+  courseNameEl.textContent = `Ваш курс: ${courseData?.title ?? 'Без названия'}`
+  renderProgress(course.progress)
+
+  const lessons = await loadLessons(course.course_id)
+  userLessons = await loadUserLessons(user.id)
+
+  renderLessons(lessons, userLessons)
+  lessonsContainer.classList.remove('active')
+  lessonsContainer.style.display = 'none'
+  btnToggleLessons.textContent = 'Показать уроки'
+}
+
 function renderLessons(lessons, userLessons) {
   lessonsListEl.innerHTML = ''
 
@@ -331,10 +395,15 @@ function renderLessons(lessons, userLessons) {
 }
 
 btnToggleLessons.addEventListener('click', () => {
-  const lessons = document.getElementById('lessons')
-  lessons.classList.toggle('active')
-  lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
-  btnToggleLessons.textContent = lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
+  if (lessonsContainer.classList.contains('active')) {
+    lessonsContainer.classList.remove('active')
+    lessonsContainer.style.display = 'none'
+    btnToggleLessons.textContent = 'Показать уроки'
+  } else {
+    lessonsContainer.classList.add('active')
+    lessonsContainer.style.display = 'block'
+    btnToggleLessons.textContent = 'Скрыть уроки'
+  }
 })
 
 btnLogout.addEventListener('click', async () => {
@@ -342,37 +411,31 @@ btnLogout.addEventListener('click', async () => {
   location.href = 'login.html'
 })
 
+let user = null
 async function loadDashboard() {
   welcomeEl.textContent = 'Загрузка...'
   courseNameEl.textContent = ''
   renderProgress(0)
   lessonsListEl.innerHTML = ''
+  coursesListEl.innerHTML = ''
 
-  const user = await getSession()
+  user = await getSession()
   if (!user) return
 
   const profile = await loadProfile(user.id)
   welcomeEl.textContent = `Добро пожаловать, ${profile?.name ?? 'ученик'}!`
 
-  const userCourse = await loadUserCourse(user.id)
-  if (!userCourse) {
+  const userCourses = await loadUserCourses(user.id)
+  if (!userCourses.length) {
     courseNameEl.textContent = 'У вас нет доступных курсов'
     renderProgress(0)
     return
   }
 
-  // Загружаем название курса отдельно
-  const courseData = await loadCourse(userCourse.course_id)
-  courseNameEl.textContent = `Ваш курс: ${courseData?.title ?? 'Без названия'}`
-  renderProgress(userCourse.progress)
+  renderCourses(userCourses)
 
-  const lessons = await loadLessons(userCourse.course_id)
-  const userLessons = await loadUserLessons(user.id)
-
-  console.log('Уроки:', lessons)
-  console.log('Статусы уроков:', userLessons)
-
-  renderLessons(lessons, userLessons)
+  // Загружаем данные первого курса
+  await loadCourseData(userCourses[0])
 }
 
 loadDashboard()
