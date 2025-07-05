@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Админ-панель</title>
+  <title>Панель преподавателя</title>
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -71,7 +71,6 @@
     <thead>
       <tr>
         <th>Ученик</th>
-        <th>Курс</th>
         <th>Урок</th>
         <th>Оценка</th>
         <th>Доступ</th>
@@ -88,40 +87,32 @@
     const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
     const supabase = createClient(supabaseUrl, supabaseKey)
 
+    // Проверка авторизации
     const { data: sessionData } = await supabase.auth.getSession()
     const user = sessionData?.session?.user
 
-    if (!user) {
-      location.href = 'login.html'
-    }
+    if (!user) location.href = 'login.html'
+    if (user.email !== 'info@native-speech.com') location.href = 'login.html'
 
-    if (user.email !== 'info@native-speech.com') {
-      location.href = 'login.html'
-    }
-
-    const { data: rows } = await supabase
+    // Получаем user_lessons с профилем и уроком
+    const { data: rows, error } = await supabase
       .from('user_lessons')
       .select(`
         id,
         grade,
         access,
-        user_id,
-        lesson_id,
-        profiles(name),
-        lessons(title, course_id),
-        courses:title=lessons.course_id(title)
+        profiles ( name, role ),
+        lessons ( title )
       `)
-      .neq('profiles.role', 'teacher')
-      .order('user_id')
 
+    const students = rows?.filter(row => row.profiles?.role !== 'teacher')
     const tbody = document.querySelector('#adminTable tbody')
 
-    for (const row of rows) {
+    for (const row of students) {
       const tr = document.createElement('tr')
 
       tr.innerHTML = `
         <td>${row.profiles?.name || '—'}</td>
-        <td>${row.courses?.title || '—'}</td>
         <td>${row.lessons?.title || '—'}</td>
         <td>
           <input type="text" value="${row.grade || ''}" data-id="${row.id}" class="grade-input" />
@@ -140,26 +131,25 @@
       tbody.appendChild(tr)
     }
 
-    // Сохранение изменений
+    // Сохранение
     document.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('save-btn')) {
-        const id = e.target.dataset.id
-        const grade = document.querySelector(`.grade-input[data-id="${id}"]`).value
-        const access = document.querySelector(`.access-select[data-id="${id}"]`).value === 'true'
+      if (!e.target.classList.contains('save-btn')) return
 
-        e.target.textContent = '⏳'
+      const id = e.target.dataset.id
+      const grade = document.querySelector(`.grade-input[data-id="${id}"]`).value
+      const access = document.querySelector(`.access-select[data-id="${id}"]`).value === 'true'
 
-        const { error } = await supabase
-          .from('user_lessons')
-          .update({ grade, access })
-          .eq('id', id)
+      e.target.textContent = '⏳'
 
-        e.target.textContent = error ? '❌' : '✅'
+      const { error } = await supabase
+        .from('user_lessons')
+        .update({ grade, access })
+        .eq('id', id)
 
-        setTimeout(() => {
-          e.target.textContent = '💾'
-        }, 1500)
-      }
+      e.target.textContent = error ? '❌' : '✅'
+      setTimeout(() => {
+        e.target.textContent = '💾'
+      }, 1500)
     })
   </script>
 </body>
