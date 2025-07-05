@@ -241,7 +241,7 @@ async function loadUserCourse(userId) {
       .from('user_courses')
       .select('progress, course_id')
       .eq('user_id', userId)
-      .eq('access_granted', true)
+      .eq('access', true)  // заменено с access_granted
       .maybeSingle()
     if (error) throw error
     return data
@@ -250,6 +250,7 @@ async function loadUserCourse(userId) {
     return null
   }
 }
+
 
 async function loadCourse(courseId) {
   try {
