@@ -5,68 +5,67 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Урок</title>
   <style>
-    body, html {
-      margin: 0; padding: 0; height: 100%;
+    body {
       font-family: Arial, sans-serif;
-      background: #fff;
+      padding: 2rem;
+      max-width: 700px;
+      margin: auto;
+      background: #f9f9f9;
+      color: #241c15;
     }
-    #lessonFrame {
-      width: 100%;
-      height: 100vh;
-      border: none;
+    #content {
+      background: white;
+      padding: 1.5rem;
+      border-radius: 0.5rem;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    #loading {
-      padding: 1rem;
-      font-size: 1.2rem;
-      text-align: center;
-      margin-top: 2rem;
-      color: #444;
+    h1 {
+      font-size: 1.75rem;
+      margin-bottom: 1rem;
     }
   </style>
 </head>
 <body>
-  <div id="loading">Загрузка урока...</div>
-  <iframe id="lessonFrame" style="display:none;"></iframe>
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+<h1>Загрузка урока...</h1>
+<div id="content"></div>
 
-    const supabase = createClient(
-      'https://hisourxrdfdjhgwbrpgs.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
-    )
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const params = new URLSearchParams(window.location.search);
-    const lessonId = params.get('id');
+const supabase = createClient(
+  'https://hisourxrdfdjhgwbrpgs.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
+)
 
-    async function loadLessonUrl(id) {
-      if (!id) {
-        document.getElementById('loading').textContent = 'ID урока не указан';
-        return;
-      }
+const headingEl = document.querySelector('h1')
+const contentEl = document.getElementById('content')
 
-      const { data, error } = await supabase
-        .from('lessons')
-        .select('content_url, title')
-        .eq('id', id)
-        .single();
+// Получаем ID урока из URL
+function getLessonId() {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('id')
+}
 
-      if (error || !data?.content_url) {
-        document.getElementById('loading').textContent = 'Ошибка загрузки урока или отсутствует URL';
-        console.error(error);
-        return;
-      }
+async function loadLesson(lessonId) {
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('title, content')
+    .eq('id', lessonId)
+    .single()
 
-      document.title = data.title || 'Урок';
+  if (error || !data) {
+    headingEl.textContent = 'Урок не найден'
+    contentEl.textContent = 'Проверьте правильность ссылки или доступ.'
+    return
+  }
 
-      const iframe = document.getElementById('lessonFrame');
-      iframe.src = data.content_url;
-      iframe.style.display = 'block';
+  headingEl.textContent = data.title
+  contentEl.innerHTML = data.content
+}
 
-      document.getElementById('loading').style.display = 'none';
-    }
+loadLesson(getLessonId())
+</script>
 
-    loadLessonUrl(lessonId);
-  </script>
 </body>
 </html>
