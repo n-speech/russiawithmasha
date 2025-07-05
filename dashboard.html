@@ -199,130 +199,117 @@ button, .btn-lesson {
   }
 }
 
-  </style>
-</head>
-<body>
-  <div class="dashboard">
-    <div id="welcome">Загрузка...</div>
-    <div id="courseName"></div>
+ <script type="module">
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    <div class="progress-label">Прогресс:</div>
-    <div class="progress-bar-container">
-      <div class="progress-bar" id="progressBar"></div>
-    </div>
-    <div id="progressPercent"></div>
+  const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
+  const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+  const supabase = createClient(supabaseUrl, supabaseKey)
 
-    <div class="buttons">
-      <button id="btnToggleLessons">Показать уроки</button>
-      <button id="btnLogout">Выйти</button>
-    </div>
+  const welcomeEl = document.getElementById('welcome')
+  const courseNameEl = document.getElementById('courseName')
+  const progressBarEl = document.getElementById('progressBar')
+  const progressPercentEl = document.getElementById('progressPercent')
+  const lessonsListEl = document.getElementById('lessons-list')
 
-    <div id="lessons">
-      <div id="lessons-list"></div>
-    </div>
-  </div>
+  async function loadDashboard() {
+    let sessionData = null
+    let user = null
 
-  <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
-
-    const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
-    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-    const supabase = createClient(supabaseUrl, supabaseKey)
-
-    const welcomeEl = document.getElementById('welcome')
-    const courseNameEl = document.getElementById('courseName')
-    const progressBarEl = document.getElementById('progressBar')
-    const progressPercentEl = document.getElementById('progressPercent')
-    const lessonsListEl = document.getElementById('lessons-list')
-
-    async function loadDashboard() {
-      const { data: sessionData } = await supabase.auth.getSession()
-      const user = sessionData?.session?.user
-      if (!user) {
-        location.href = 'login.html'
-        return
-      }
-
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('name')
-        .eq('id', user.id)
-        .single()
-
-      welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
-
-      const { data: userCourse } = await supabase
-        .from('user_courses')
-        .select('progress, course_id, courses(title)')
-        .eq('user_id', user.id)
-        .eq('access_granted', true)
-        .maybeSingle()
-
-      if (!userCourse) {
-        courseNameEl.textContent = 'Нет доступных курсов'
-        return
-      }
-
-      const { course_id, progress, courses } = userCourse
-      courseNameEl.textContent = `Ваш курс: ${courses?.title}`
-      progressBarEl.style.width = `${progress}%`
-      progressPercentEl.textContent = `${progress}% завершено`
-
-      const { data: lessons } = await supabase
-        .from('lessons')
-        .select('id, title, order_number')
-        .eq('course_id', course_id)
-        .order('order_number')
-
-      for (const lesson of lessons) {
-        const { data: userLesson } = await supabase
-          .from('user_lessons')
-          .select('grade, access')
-          .eq('lesson_id', lesson.id)
-          .eq('user_id', user.id)
-          .maybeSingle()
-
-        const grade = userLesson?.grade || '—'
-        const isLocked = !userLesson?.access
-        const buttonText = isLocked ? 'Недоступен 🔒' : 'Перейти к уроку'
-        const buttonClass = isLocked ? 'btn-lesson disabled' : 'btn-lesson'
-
-        const lessonCard = document.createElement('div')
-        lessonCard.className = 'lesson-card'
-        lessonCard.innerHTML = `
-          <div class="lesson-title">${lesson.title}</div>
-          <div class="lesson-grade">Оценка: ${grade}</div>
-          <div class="lesson-bottom">
-            <button class="${buttonClass}">${buttonText}</button>
-          </div>
-        `
-
-        // Переход только если доступ открыт
-        if (!isLocked) {
-          const button = lessonCard.querySelector('.btn-lesson')
-          button.addEventListener('click', () => {
-            window.location.href = `lesson.html?id=${lesson.id}`
-          })
-        }
-
-        lessonsListEl.appendChild(lessonCard)
-      }
+    // Пробуем дождаться сессии
+    for (let i = 0; i < 10; i++) {
+      const sessionResponse = await supabase.auth.getSession()
+      sessionData = sessionResponse.data
+      user = sessionData?.session?.user
+      if (user) break
+      await new Promise((r) => setTimeout(r, 200))
     }
 
-    document.getElementById('btnToggleLessons').addEventListener('click', () => {
-      const lessons = document.getElementById('lessons')
-      lessons.classList.toggle('active')
-      lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
-      document.getElementById('btnToggleLessons').textContent =
-        lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
-    })
-
-    document.getElementById('btnLogout').addEventListener('click', async () => {
-      await supabase.auth.signOut()
+    if (!user) {
       location.href = 'login.html'
-    })
+      return
+    }
 
-    loadDashboard()
-  </script>
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('name')
+      .eq('id', user.id)
+      .single()
+
+    welcomeEl.textContent = `Добро пожаловать, ${profile?.name || 'ученик'}!`
+
+    const { data: userCourse } = await supabase
+      .from('user_courses')
+      .select('progress, course_id, courses(title)')
+      .eq('user_id', user.id)
+      .eq('access_granted', true)
+      .maybeSingle()
+
+    if (!userCourse) {
+      courseNameEl.textContent = 'Нет доступных курсов'
+      return
+    }
+
+    const { course_id, progress, courses } = userCourse
+    courseNameEl.textContent = `Ваш курс: ${courses?.title}`
+    progressBarEl.style.width = `${progress}%`
+    progressPercentEl.textContent = `${progress}% завершено`
+
+    const { data: lessons } = await supabase
+      .from('lessons')
+      .select('id, title, order_number')
+      .eq('course_id', course_id)
+      .order('order_number')
+
+    for (const lesson of lessons) {
+      const { data: userLesson } = await supabase
+        .from('user_lessons')
+        .select('grade, access')
+        .eq('lesson_id', lesson.id)
+        .eq('user_id', user.id)
+        .maybeSingle()
+
+      const grade = userLesson?.grade || '—'
+      const isLocked = !userLesson?.access
+      const buttonText = isLocked ? 'Недоступен 🔒' : 'Перейти к уроку'
+      const buttonClass = isLocked ? 'btn-lesson disabled' : 'btn-lesson'
+
+      const lessonCard = document.createElement('div')
+      lessonCard.className = 'lesson-card'
+      lessonCard.innerHTML = `
+        <div class="lesson-title">${lesson.title}</div>
+        <div class="lesson-grade">Оценка: ${grade}</div>
+        <div class="lesson-bottom">
+          <button class="${buttonClass}">${buttonText}</button>
+        </div>
+      `
+
+      if (!isLocked) {
+        const button = lessonCard.querySelector('.btn-lesson')
+        button.addEventListener('click', () => {
+          window.location.href = `lesson.html?id=${lesson.id}`
+        })
+      }
+
+      lessonsListEl.appendChild(lessonCard)
+    }
+  }
+
+  document.getElementById('btnToggleLessons').addEventListener('click', () => {
+    const lessons = document.getElementById('lessons')
+    lessons.classList.toggle('active')
+    lessons.style.display = lessons.classList.contains('active') ? 'block' : 'none'
+    document.getElementById('btnToggleLessons').textContent =
+      lessons.classList.contains('active') ? 'Скрыть уроки' : 'Показать уроки'
+  })
+
+  document.getElementById('btnLogout').addEventListener('click', async () => {
+    await supabase.auth.signOut()
+    location.href = 'login.html'
+  })
+
+  loadDashboard()
+</script>
+
 </body>
 </html>
