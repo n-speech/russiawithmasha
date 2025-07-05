@@ -150,24 +150,48 @@
     const msg = document.getElementById('message')
 
     btnLogin.addEventListener('click', async () => {
-      const email = document.getElementById('email').value.trim()
-      const password = document.getElementById('password').value.trim()
+  const email = document.getElementById('email').value.trim()
+  const password = document.getElementById('password').value.trim()
 
-      msg.textContent = ''
+  msg.textContent = ''
 
-      if (!email || !password) {
-        msg.textContent = 'Пожалуйста, введите email и пароль'
-        return
-      }
+  if (!email || !password) {
+    msg.textContent = 'Пожалуйста, введите email и пароль'
+    return
+  }
 
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
+    email,
+    password
+  })
 
-      if (error) {
-        msg.textContent = 'Ошибка входа: ' + error.message
-      } else {
-        window.location.href = 'dashboard.html'
-      }
-    })
+  if (error) {
+    msg.textContent = 'Ошибка входа: ' + error.message
+    return
+  }
+
+  const user = authData.user
+
+  // Получаем роль из таблицы profiles
+  const { data: profile, error: profileError } = await supabase
+    .from('profiles')
+    .select('role')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError) {
+    msg.textContent = 'Ошибка загрузки профиля'
+    return
+  }
+
+  // Перенаправляем по роли
+  if (profile?.role === 'teacher') {
+    window.location.href = 'admin.html'
+  } else {
+    window.location.href = 'dashboard.html'
+  }
+})
+
   </script>
 </body>
 </html>
