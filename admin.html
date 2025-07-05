@@ -2,26 +2,27 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <title>Админка преподавателя</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Админ-панель</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
+      background: #f4f4f4;
+      margin: 0;
       padding: 2rem;
     }
 
     h1 {
-      color: #241c15;
-      margin-bottom: 1rem;
+      text-align: center;
+      color: #333;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
+      margin-top: 2rem;
       background: #fff;
-      border: 1px solid #ddd;
-      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
 
     th, td {
@@ -32,28 +33,40 @@
 
     th {
       background-color: #FFD966;
+      color: #241c15;
     }
 
-    td input {
-      width: 100%;
+    input[type="text"], select {
       padding: 0.25rem;
+      font-size: 1rem;
+      width: 100%;
+      box-sizing: border-box;
     }
 
-    .toggle-access {
+    .center {
+      text-align: center;
+    }
+
+    .save-btn {
+      background-color: #ffd966;
+      border: none;
+      padding: 0.5rem 1rem;
       cursor: pointer;
-      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 4px;
     }
 
-    .status {
-      font-size: 0.9rem;
-      margin-top: 1rem;
-      color: green;
+    .save-btn:hover {
+      background-color: #e6c400;
+    }
+
+    .disabled {
+      opacity: 0.6;
     }
   </style>
 </head>
 <body>
   <h1>Панель преподавателя</h1>
-  <div id="status" class="status"></div>
   <table id="adminTable">
     <thead>
       <tr>
@@ -62,6 +75,7 @@
         <th>Урок</th>
         <th>Оценка</th>
         <th>Доступ</th>
+        <th class="center">Сохранить</th>
       </tr>
     </thead>
     <tbody></tbody>
@@ -70,104 +84,83 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const supabase = createClient(
-      'https://eawveeyhkqewfhswcxmy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-    )
-
-    const allowedEmail = 'info@native-speech.com'
+    const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
     const { data: sessionData } = await supabase.auth.getSession()
-    const user = sessionData.session?.user
+    const user = sessionData?.session?.user
 
-    if (!user || user.email !== allowedEmail) {
-      alert('Доступ запрещён')
-      window.location.href = 'login.html'
+    if (!user) {
+      location.href = 'login.html'
     }
 
-    const tableBody = document.querySelector('#adminTable tbody')
-    const statusEl = document.getElementById('status')
-
-    async function loadData() {
-      const { data, error } = await supabase
-        .from('user_lessons')
-        .select(`
-          id,
-          grade,
-          access,
-          user_id,
-          lesson_id,
-          profiles(name),
-          lessons(title, course_id),
-          courses!lessons_course_id_fkey(title)
-        `)
-
-      if (error) {
-        console.error('Ошибка загрузки:', error)
-        return
-      }
-
-      tableBody.innerHTML = ''
-
-      data.forEach((row) => {
-        const tr = document.createElement('tr')
-
-        // Имя, курс, урок
-        tr.innerHTML = `
-          <td>${row.profiles?.name || '—'}</td>
-          <td>${row.courses?.title || '—'}</td>
-          <td>${row.lessons?.title || '—'}</td>
-          <td><input value="${row.grade || ''}" data-id="${row.id}" data-type="grade" /></td>
-          <td class="toggle-access" data-id="${row.id}" data-value="${row.access}">
-            ${row.access ? '✅' : '❌'}
-          </td>
-        `
-
-        tableBody.appendChild(tr)
-      })
+    if (user.email !== 'info@native-speech.com') {
+      location.href = 'login.html'
     }
 
-    // Обработка изменения оценки
-    tableBody.addEventListener('input', async (e) => {
-      if (e.target.dataset.type === 'grade') {
+    const { data: rows } = await supabase
+      .from('user_lessons')
+      .select(`
+        id,
+        grade,
+        access,
+        user_id,
+        lesson_id,
+        profiles(name),
+        lessons(title, course_id),
+        courses:title=lessons.course_id(title)
+      `)
+      .neq('profiles.role', 'teacher')
+      .order('user_id')
+
+    const tbody = document.querySelector('#adminTable tbody')
+
+    for (const row of rows) {
+      const tr = document.createElement('tr')
+
+      tr.innerHTML = `
+        <td>${row.profiles?.name || '—'}</td>
+        <td>${row.courses?.title || '—'}</td>
+        <td>${row.lessons?.title || '—'}</td>
+        <td>
+          <input type="text" value="${row.grade || ''}" data-id="${row.id}" class="grade-input" />
+        </td>
+        <td>
+          <select data-id="${row.id}" class="access-select">
+            <option value="true" ${row.access ? 'selected' : ''}>✅</option>
+            <option value="false" ${!row.access ? 'selected' : ''}>❌</option>
+          </select>
+        </td>
+        <td class="center">
+          <button class="save-btn" data-id="${row.id}">💾</button>
+        </td>
+      `
+
+      tbody.appendChild(tr)
+    }
+
+    // Сохранение изменений
+    document.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('save-btn')) {
         const id = e.target.dataset.id
-        const newGrade = e.target.value
+        const grade = document.querySelector(`.grade-input[data-id="${id}"]`).value
+        const access = document.querySelector(`.access-select[data-id="${id}"]`).value === 'true'
+
+        e.target.textContent = '⏳'
 
         const { error } = await supabase
           .from('user_lessons')
-          .update({ grade: newGrade })
+          .update({ grade, access })
           .eq('id', id)
 
-        statusEl.textContent = error ? '❌ Ошибка при обновлении оценки' : '✅ Оценка обновлена'
-        setTimeout(() => statusEl.textContent = '', 2000)
+        e.target.textContent = error ? '❌' : '✅'
+
+        setTimeout(() => {
+          e.target.textContent = '💾'
+        }, 1500)
       }
     })
-
-    // Переключение доступа
-    tableBody.addEventListener('click', async (e) => {
-      if (e.target.classList.contains('toggle-access')) {
-        const id = e.target.dataset.id
-        const current = e.target.dataset.value === 'true'
-        const newValue = !current
-
-        const { error } = await supabase
-          .from('user_lessons')
-          .update({ access: newValue })
-          .eq('id', id)
-
-        if (!error) {
-          e.target.textContent = newValue ? '✅' : '❌'
-          e.target.dataset.value = newValue
-          statusEl.textContent = '✅ Доступ обновлён'
-        } else {
-          statusEl.textContent = '❌ Ошибка при обновлении доступа'
-        }
-
-        setTimeout(() => statusEl.textContent = '', 2000)
-      }
-    })
-
-    loadData()
   </script>
 </body>
 </html>
