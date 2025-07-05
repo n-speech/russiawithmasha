@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <title>Админка преподавателя</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f9f9f9;
+      padding: 2rem;
+    }
+
+    h1 {
+      color: #241c15;
+      margin-bottom: 1rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+      border: 1px solid #ddd;
+      box-shadow: 0 0 8px rgba(0,0,0,0.05);
+    }
+
+    th, td {
+      padding: 0.75rem;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #FFD966;
+    }
+
+    td input {
+      width: 100%;
+      padding: 0.25rem;
+    }
+
+    .toggle-access {
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .status {
+      font-size: 0.9rem;
+      margin-top: 1rem;
+      color: green;
+    }
+  </style>
+</head>
+<body>
+  <h1>Панель преподавателя</h1>
+  <div id="status" class="status"></div>
+  <table id="adminTable">
+    <thead>
+      <tr>
+        <th>Ученик</th>
+        <th>Курс</th>
+        <th>Урок</th>
+        <th>Оценка</th>
+        <th>Доступ</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+
+    const supabase = createClient(
+      'https://eawveeyhkqewfhswcxmy.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+    )
+
+    const allowedEmail = 'info@native-speech.com'
+
+    const { data: sessionData } = await supabase.auth.getSession()
+    const user = sessionData.session?.user
+
+    if (!user || user.email !== allowedEmail) {
+      alert('Доступ запрещён')
+      window.location.href = 'login.html'
+    }
+
+    const tableBody = document.querySelector('#adminTable tbody')
+    const statusEl = document.getElementById('status')
+
+    async function loadData() {
+      const { data, error } = await supabase
+        .from('user_lessons')
+        .select(`
+          id,
+          grade,
+          access,
+          user_id,
+          lesson_id,
+          profiles(name),
+          lessons(title, course_id),
+          courses!lessons_course_id_fkey(title)
+        `)
+
+      if (error) {
+        console.error('Ошибка загрузки:', error)
+        return
+      }
+
+      tableBody.innerHTML = ''
+
+      data.forEach((row) => {
+        const tr = document.createElement('tr')
+
+        // Имя, курс, урок
+        tr.innerHTML = `
+          <td>${row.profiles?.name || '—'}</td>
+          <td>${row.courses?.title || '—'}</td>
+          <td>${row.lessons?.title || '—'}</td>
+          <td><input value="${row.grade || ''}" data-id="${row.id}" data-type="grade" /></td>
+          <td class="toggle-access" data-id="${row.id}" data-value="${row.access}">
+            ${row.access ? '✅' : '❌'}
+          </td>
+        `
+
+        tableBody.appendChild(tr)
+      })
+    }
+
+    // Обработка изменения оценки
+    tableBody.addEventListener('input', async (e) => {
+      if (e.target.dataset.type === 'grade') {
+        const id = e.target.dataset.id
+        const newGrade = e.target.value
+
+        const { error } = await supabase
+          .from('user_lessons')
+          .update({ grade: newGrade })
+          .eq('id', id)
+
+        statusEl.textContent = error ? '❌ Ошибка при обновлении оценки' : '✅ Оценка обновлена'
+        setTimeout(() => statusEl.textContent = '', 2000)
+      }
+    })
+
+    // Переключение доступа
+    tableBody.addEventListener('click', async (e) => {
+      if (e.target.classList.contains('toggle-access')) {
+        const id = e.target.dataset.id
+        const current = e.target.dataset.value === 'true'
+        const newValue = !current
+
+        const { error } = await supabase
+          .from('user_lessons')
+          .update({ access: newValue })
+          .eq('id', id)
+
+        if (!error) {
+          e.target.textContent = newValue ? '✅' : '❌'
+          e.target.dataset.value = newValue
+          statusEl.textContent = '✅ Доступ обновлён'
+        } else {
+          statusEl.textContent = '❌ Ошибка при обновлении доступа'
+        }
+
+        setTimeout(() => statusEl.textContent = '', 2000)
+      }
+    })
+
+    loadData()
+  </script>
+</body>
+</html>
