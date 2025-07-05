@@ -2,7 +2,7 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Панель преподавателя</title>
   <style>
     body {
@@ -11,18 +11,10 @@
       margin: 0;
       padding: 2rem;
     }
-
     h1 {
       text-align: center;
       color: #333;
     }
-
-    #status {
-      text-align: center;
-      font-weight: bold;
-      margin-top: 1rem;
-    }
-
     table {
       width: 100%;
       border-collapse: collapse;
@@ -30,29 +22,24 @@
       background: #fff;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-
     th, td {
       padding: 0.75rem;
       border: 1px solid #ddd;
       text-align: left;
     }
-
     th {
       background-color: #FFD966;
       color: #241c15;
     }
-
     input[type="text"], select {
       padding: 0.25rem;
       font-size: 1rem;
       width: 100%;
       box-sizing: border-box;
     }
-
     .center {
       text-align: center;
     }
-
     .save-btn {
       background-color: #ffd966;
       border: none;
@@ -61,16 +48,17 @@
       font-weight: bold;
       border-radius: 4px;
     }
-
     .save-btn:hover {
       background-color: #e6c400;
+    }
+    .disabled {
+      opacity: 0.6;
     }
   </style>
 </head>
 <body>
   <h1>Панель преподавателя</h1>
-  <div id="status">Загрузка...</div>
-  <table id="adminTable" style="display: none;">
+  <table id="adminTable">
     <thead>
       <tr>
         <th>Ученик</th>
@@ -86,58 +74,69 @@
   <script type="module">
     import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-    const supabase = createClient(
-      'https://eawveeyhkqewfhswcxmy.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
-    )
+    const supabaseUrl = 'https://eawveeyhkqewfhswcxmy.supabase.co'
+    const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImVhd3ZlZXloa3Fld2Zoc3djeG15Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTA3NTI5MTYsImV4cCI6MjA2NjMyODkxNn0.-6G5o9dZ2V9cAfqIBIYzFp5PDzs4IehCn_b3YlYot-I'
+    const supabase = createClient(supabaseUrl, supabaseKey)
 
-    const status = document.getElementById('status')
-    const table = document.getElementById('adminTable')
-    const tbody = table.querySelector('tbody')
+    async function checkAuth() {
+      const { data: { session }, error } = await supabase.auth.getSession()
+      if (error) {
+        alert('Ошибка при проверке сессии')
+        location.href = 'login.html'
+        return null
+      }
+      if (!session) {
+        location.href = 'login.html'
+        return null
+      }
+      return session.user
+    }
 
-    const sessionRes = await supabase.auth.getSession()
-    const user = sessionRes?.data?.session?.user
-
-    if (!user) {
-      location.href = 'login.html'
-    } else {
-      const { data: profile } = await supabase
+    async function checkTeacher(user) {
+      // Получаем профиль пользователя
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select('role')
         .eq('id', user.id)
-        .maybeSingle()
+        .single()
 
-      if (!profile || profile.role !== 'teacher') {
+      if (error || !profile || profile.role !== 'teacher') {
         location.href = 'login.html'
+        return false
       }
+      return true
     }
 
-    const { data: rows, error } = await supabase
-      .from('user_lessons')
-      .select(`
-        id,
-        grade,
-        access,
-        profiles ( name, role ),
-        lessons ( title )
-      `)
+    async function loadData() {
+      const { data: rows, error } = await supabase
+        .from('user_lessons')
+        .select(`
+          id,
+          grade,
+          access,
+          profiles ( name, role ),
+          lessons ( title )
+        `)
 
-    if (error) {
-      status.textContent = 'Ошибка загрузки данных.'
-      console.error(error)
-    } else if (!rows || rows.length === 0) {
-      status.textContent = 'Нет данных.'
-    } else {
-      const students = rows.filter(r => r.profiles?.role !== 'teacher')
-      status.style.display = 'none'
-      table.style.display = 'table'
+      if (error) {
+        alert('Ошибка загрузки данных: ' + error.message)
+        return []
+      }
 
-      for (const row of students) {
+      return rows.filter(row => row.profiles?.role !== 'teacher')
+    }
+
+    function renderTable(rows) {
+      const tbody = document.querySelector('#adminTable tbody')
+      tbody.innerHTML = ''
+      for (const row of rows) {
         const tr = document.createElement('tr')
         tr.innerHTML = `
           <td>${row.profiles?.name || '—'}</td>
           <td>${row.lessons?.title || '—'}</td>
-          <td><input type="text" value="${row.grade || ''}" data-id="${row.id}" class="grade-input" /></td>
+          <td>
+            <input type="text" value="${row.grade || ''}" data-id="${row.id}" class="grade-input" />
+          </td>
           <td>
             <select data-id="${row.id}" class="access-select">
               <option value="true" ${row.access ? 'selected' : ''}>✅</option>
@@ -152,25 +151,35 @@
       }
     }
 
-    document.addEventListener('click', async (e) => {
-      if (!e.target.classList.contains('save-btn')) return
+    async function main() {
+      const user = await checkAuth()
+      if (!user) return
+      const isTeacher = await checkTeacher(user)
+      if (!isTeacher) return
 
-      const id = e.target.dataset.id
-      const gradeInput = document.querySelector(`.grade-input[data-id="${id}"]`)
-      const accessSelect = document.querySelector(`.access-select[data-id="${id}"]`)
-      const grade = gradeInput.value
-      const access = accessSelect.value === 'true'
+      const data = await loadData()
+      renderTable(data)
 
-      e.target.textContent = '⏳'
+      document.addEventListener('click', async e => {
+        if (!e.target.classList.contains('save-btn')) return
+        const id = e.target.dataset.id
+        const grade = document.querySelector(`.grade-input[data-id="${id}"]`).value
+        const access = document.querySelector(`.access-select[data-id="${id}"]`).value === 'true'
 
-      const { error } = await supabase
-        .from('user_lessons')
-        .update({ grade, access })
-        .eq('id', id)
+        e.target.textContent = '⏳'
+        const { error } = await supabase
+          .from('user_lessons')
+          .update({ grade, access })
+          .eq('id', id)
 
-      e.target.textContent = error ? '❌' : '✅'
-      setTimeout(() => e.target.textContent = '💾', 1500)
-    })
+        e.target.textContent = error ? '❌' : '✅'
+        setTimeout(() => {
+          e.target.textContent = '💾'
+        }, 1500)
+      })
+    }
+
+    main()
   </script>
 </body>
 </html>
