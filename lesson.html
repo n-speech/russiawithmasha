@@ -3,71 +3,96 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Урок</title>
+  <title>Загрузка урока...</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      padding: 2rem;
       max-width: 700px;
-      margin: auto;
+      margin: 2rem auto;
+      padding: 0 1rem;
       background-color: #f9f9f9;
-    }
-    h1 {
       color: #241c15;
     }
-    #content {
-      margin-top: 1rem;
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+    }
+    #lessonContent {
       background: white;
-      padding: 1rem 1.5rem;
+      padding: 1.5rem;
       border-radius: 0.5rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      line-height: 1.5;
+      min-height: 150px;
+    }
+    #error {
+      color: red;
+      font-weight: 700;
+    }
+    a.back-link {
+      display: inline-block;
+      margin-top: 2rem;
+      color: #FFD966;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    a.back-link:hover {
+      text-decoration: underline;
     }
   </style>
 </head>
 <body>
-  <h1 id="lessonTitle">Загрузка...</h1>
-  <div id="content">Пожалуйста, подождите...</div>
+
+  <h1 id="lessonTitle">Загрузка урока...</h1>
+  <div id="lessonContent">Пожалуйста, подождите...</div>
+  <div id="error" style="display:none;"></div>
+  <a href="dashboard.html" class="back-link">← Вернуться к курсам</a>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-const supabase = createClient(
-  'https://hisourxrdfdjhgwbrpgs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
-)
+  const supabaseUrl = 'https://hisourxrdfdjhgwbrpgs.supabase.co' // поменяй на свой URL
+  const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 
-const lessonTitleEl = document.getElementById('lessonTitle')
-const contentEl = document.getElementById('content')
+  const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
-function getLessonIdFromUrl() {
+  const lessonTitleEl = document.getElementById('lessonTitle')
+  const lessonContentEl = document.getElementById('lessonContent')
+  const errorEl = document.getElementById('error')
+
+  // Получаем id урока из URL ?id=123
   const params = new URLSearchParams(window.location.search)
-  return params.get('id')
-}
+  const lessonId = params.get('id')
 
-async function loadLesson(lessonId) {
-  const { data, error } = await supabase
-    .from('lessons')
-    .select('title, content')
-    .eq('id', lessonId)
-    .single()
-
-  if (error || !data) {
-    lessonTitleEl.textContent = 'Ошибка загрузки урока'
-    contentEl.textContent = error?.message || 'Урок не найден.'
-    return
+  if (!lessonId) {
+    lessonTitleEl.textContent = 'Ошибка'
+    lessonContentEl.textContent = 'ID урока не указан в URL'
+  } else {
+    loadLesson(lessonId)
   }
 
-  lessonTitleEl.textContent = data.title
-  contentEl.innerHTML = data.content || 'Содержимое урока отсутствует.'
-}
+  async function loadLesson(id) {
+    try {
+      const { data, error } = await supabase
+        .from('lessons')
+        .select('title, content')
+        .eq('id', id)
+        .single()
 
-const lessonId = getLessonIdFromUrl()
-if (lessonId) {
-  loadLesson(lessonId)
-} else {
-  lessonTitleEl.textContent = 'Урок не выбран'
-  contentEl.textContent = 'Пожалуйста, выберите урок в личном кабинете.'
-}
+      if (error) throw error
+      if (!data) throw new Error('Урок не найден')
+
+      lessonTitleEl.textContent = data.title || 'Без названия'
+      lessonContentEl.innerHTML = data.content || '<i>Содержание урока отсутствует.</i>'
+    } catch (err) {
+      lessonTitleEl.textContent = 'Ошибка загрузки урока'
+      lessonContentEl.textContent = ''
+      errorEl.style.display = 'block'
+      errorEl.textContent = err.message
+      console.error(err)
+    }
+  }
 </script>
+
 </body>
 </html>
