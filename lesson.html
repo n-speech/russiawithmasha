@@ -15,13 +15,19 @@
     }
     #content {
       background: white;
-      padding: 1.5rem;
+      padding: 0;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      overflow: hidden;
     }
     h1 {
       font-size: 1.75rem;
       margin-bottom: 1rem;
+    }
+    iframe {
+      width: 100%;
+      height: 1000px;
+      border: none;
     }
   </style>
 </head>
@@ -41,7 +47,6 @@ const supabase = createClient(
 const headingEl = document.querySelector('h1')
 const contentEl = document.getElementById('content')
 
-// Получаем ID урока из URL
 function getLessonId() {
   const params = new URLSearchParams(window.location.search)
   return params.get('id')
@@ -56,21 +61,14 @@ async function loadLesson(lessonId) {
 
   if (error || !data) {
     headingEl.textContent = 'Урок не найден'
-    contentEl.textContent = 'Проверьте правильность ссылки или доступ.'
+    contentEl.innerHTML = '<p>Проверьте правильность ссылки или доступ.</p>'
     return
   }
 
   headingEl.textContent = data.title
-
-  try {
-    const response = await fetch(data.content_url)
-    if (!response.ok) throw new Error('Ошибка загрузки урока по ссылке')
-    const html = await response.text()
-    contentEl.innerHTML = html
-  } catch (fetchError) {
-    contentEl.textContent = 'Не удалось загрузить содержимое урока.'
-    console.error(fetchError)
-  }
+  contentEl.innerHTML = `
+    <iframe src="${data.content_url}" frameborder="0" allowfullscreen></iframe>
+  `
 }
 
 loadLesson(getLessonId())
