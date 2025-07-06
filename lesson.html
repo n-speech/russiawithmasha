@@ -47,29 +47,18 @@ function getLessonId() {
   return params.get('id')
 }
 
-async function loadLessons(courseId) {
+async function loadLesson(lessonId) {
   const { data, error } = await supabase
     .from('lessons')
-    .select('id, title, order_number, content_url')  // добавили content_url
-    .eq('course_id', courseId)
-    .order('order_number', { ascending: true })
-  if (error) {
-    console.error('Ошибка загрузки уроков:', error)
-    return []
-  }
-  return data
-}
+    .select('title, content')
+    .eq('id', lessonId)
+    .single()
 
-  lessonCard.querySelector('button').addEventListener('click', () => {
-  // переход по ссылке из content_url
-  if (lesson.content_url) {
-    window.location.href = lesson.content_url
-  } else {
-    // на случай, если content_url пустой
-    alert('Ссылка на урок не указана')
+  if (error || !data) {
+    headingEl.textContent = 'Урок не найден'
+    contentEl.textContent = 'Проверьте правильность ссылки или доступ.'
+    return
   }
-})
-
 
   headingEl.textContent = data.title
   contentEl.innerHTML = data.content
