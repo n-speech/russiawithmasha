@@ -1,35 +1,3 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Урок</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 2rem;
-      max-width: 900px;
-      margin: auto;
-      background: #f9f9f9;
-      color: #241c15;
-    }
-    #content {
-      background: white;
-      padding: 1.5rem;
-      border-radius: 0.5rem;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      font-size: 1.75rem;
-      margin-bottom: 1rem;
-    }
-  </style>
-</head>
-<body>
-
-<h1>Загрузка урока...</h1>
-<div id="content"></div>
-
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
@@ -41,7 +9,7 @@ const supabase = createClient(
 const headingEl = document.querySelector('h1')
 const contentEl = document.getElementById('content')
 
-// Получаем ID урока из URL
+// Получаем ID урока из URL (?id=...)
 function getLessonId() {
   const params = new URLSearchParams(window.location.search)
   return params.get('id')
@@ -50,7 +18,7 @@ function getLessonId() {
 async function loadLesson(lessonId) {
   const { data, error } = await supabase
     .from('lessons')
-    .select('title, content')
+    .select('title, content_url')
     .eq('id', lessonId)
     .single()
 
@@ -61,11 +29,17 @@ async function loadLesson(lessonId) {
   }
 
   headingEl.textContent = data.title
-  contentEl.innerHTML = data.content
+
+  try {
+    const response = await fetch(data.content_url)
+    if (!response.ok) throw new Error('Ошибка загрузки урока по ссылке')
+    const html = await response.text()
+    contentEl.innerHTML = html
+  } catch (fetchError) {
+    contentEl.textContent = 'Не удалось загрузить содержимое урока.'
+    console.error(fetchError)
+  }
 }
 
 loadLesson(getLessonId())
 </script>
-
-</body>
-</html>
