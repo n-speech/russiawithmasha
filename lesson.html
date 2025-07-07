@@ -14,11 +14,11 @@
       margin: 0;
       background: #f9f9f9;
       color: #241c15;
-      overflow-x: hidden;
+      overflow-x: hidden; /* 💡 Защита от горизонтального скролла */
     }
     #content {
       background: white;
-      padding: 1rem;
+      padding: 0;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       overflow: hidden;
@@ -33,88 +33,55 @@
       border: none;
       display: block;
     }
+
     @media (max-width: 650px) {
       iframe {
-        height: 600px;
+        height: 600px; /* адаптация высоты под мобильный */
       }
     }
   </style>
 </head>
 <body>
 
-<h1 id="status">Загрузка урока...</h1>
+<h1>Загрузка урока...</h1>
 <div id="content"></div>
 
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-// 1. Supabase client
 const supabase = createClient(
   'https://hisourxrdfdjhgwbrpgs.supabase.co',
-  'публичный_анонимный_ключ'
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 )
 
-const statusEl = document.getElementById('status')
+const headingEl = document.querySelector('h1')
 const contentEl = document.getElementById('content')
 
-// 2. Получаем ID урока из URL
 function getLessonId() {
   const params = new URLSearchParams(window.location.search)
   return params.get('id')
 }
 
-// 3. Проверка доступа
-async function checkAccess(lessonId) {
-  // 3.1 Получить пользователя
-  const { data: { user } } = await supabase.auth.getUser()
-
-  if (!user) {
-    statusEl.textContent = 'Доступ запрещён. Пожалуйста, войдите в личный кабинет.'
-    contentEl.innerHTML = ''
-    return
-  }
-
-  // 3.2 Проверка доступа в таблице user_lessons
+async function loadLesson(lessonId) {
   const { data, error } = await supabase
-    .from('user_lessons')
-    .select('access')
-    .eq('user_id', user.id)
-    .eq('lesson_id', lessonId)
-    .single()
-
-  if (error || !data || !data.access) {
-    statusEl.textContent = 'У вас нет доступа к этому уроку.'
-    contentEl.innerHTML = ''
-    return
-  }
-
-  // 3.3 Получить сам урок
-  const { data: lessonData, error: lessonError } = await supabase
     .from('lessons')
     .select('title, content_url')
     .eq('id', lessonId)
     .single()
 
-  if (lessonError || !lessonData) {
-    statusEl.textContent = 'Урок не найден.'
-    contentEl.innerHTML = ''
+  if (error || !data) {
+    headingEl.textContent = 'Урок не найден'
+    contentEl.innerHTML = '<p>Проверьте правильность ссылки или доступ.</p>'
     return
   }
 
-  // ✅ Показать урок
-  statusEl.textContent = lessonData.title
+  headingEl.textContent = data.title
   contentEl.innerHTML = `
-    <iframe src="${lessonData.content_url}" allowfullscreen></iframe>
+    <iframe src="${data.content_url}" allowfullscreen></iframe>
   `
 }
 
-// 🚀 Запуск
-const lessonId = getLessonId()
-if (!lessonId) {
-  statusEl.textContent = 'ID урока не указан в ссылке.'
-} else {
-  checkAccess(lessonId)
-}
+loadLesson(getLessonId())
 </script>
 
 </body>
