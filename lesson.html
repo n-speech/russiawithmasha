@@ -47,11 +47,12 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-  // 🔑 Заменить на свои данные!
+ // 🔑 Заменить на свои данные!
  const supabase = createClient(
   'https://hisourxrdfdjhgwbrpgs.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 )
+
 
 // 🧑 Проверка авторизации
 const { data: { user } } = await supabase.auth.getUser()
@@ -100,4 +101,4 @@ document.getElementById('content').innerHTML = `
 
 </body>
 </html>
-
+ 
