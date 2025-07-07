@@ -5,16 +5,20 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Урок</title>
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
     body {
       font-family: Arial, sans-serif;
-      background: #f9f9f9;
-      margin: 0;
       padding: 1rem;
+      margin: 0;
+      background: #f9f9f9;
       color: #241c15;
-      overflow-x: hidden;
+      overflow-x: hidden; /* 💡 Защита от горизонтального скролла */
     }
     #content {
       background: white;
+      padding: 0;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       overflow: hidden;
@@ -29,9 +33,10 @@
       border: none;
       display: block;
     }
+
     @media (max-width: 650px) {
       iframe {
-        height: 600px;
+        height: 600px; /* адаптация высоты под мобильный */
       }
     }
   </style>
@@ -49,52 +54,35 @@ const supabase = createClient(
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 )
 
-// 🔐 Проверка авторизации
-const { data: { user } } = await supabase.auth.getUser()
-if (!user) {
-  document.body.innerHTML = '<h1>Доступ запрещён</h1><p>Пожалуйста, войдите в систему.</p>'
-  throw new Error('Нет доступа')
+const headingEl = document.querySelector('h1')
+const contentEl = document.getElementById('content')
+
+function getLessonId() {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('id')
 }
 
-// Получаем ID урока
-const params = new URLSearchParams(window.location.search)
-const lessonId = params.get('id')
-if (!lessonId) {
-  document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте ссылку.</p>'
-  throw new Error('Нет lessonId')
+async function loadLesson(lessonId) {
+  const { data, error } = await supabase
+    .from('lessons')
+    .select('title, content_url')
+    .eq('id', lessonId)
+    .single()
+
+  if (error || !data) {
+    headingEl.textContent = 'Урок не найден'
+    contentEl.innerHTML = '<p>Проверьте правильность ссылки или доступ.</p>'
+    return
+  }
+
+  headingEl.textContent = data.title
+  contentEl.innerHTML = `
+    <iframe src="${data.content_url}" allowfullscreen></iframe>
+  `
 }
 
-// Получаем title и folder_name
-const { data, error } = await supabase
-  .from('lessons')
-  .select('title, folder_name')
-  .eq('id', lessonId)
-  .single()
-
-if (error || !data) {
-  document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте правильность ссылки или доступ.</p>'
-  throw new Error('Урок не найден')
-}
-
-// Получаем ссылку на index.html внутри folder_name
-const { data: signedUrlData, error: signedUrlError } = await supabase
-  .storage
-  .from('lessons')
-  .createSignedUrl(`${data.folder_name}/index.html`, 60 * 60)
-
-if (signedUrlError || !signedUrlData) {
-  document.body.innerHTML = '<h1>Ошибка загрузки</h1><p>Не удалось получить ссылку на урок.</p>'
-  throw new Error('signed URL error')
-}
-
-// Показываем iframe
-document.querySelector('h1').textContent = data.title
-document.getElementById('content').innerHTML = `
-  <iframe src="${signedUrlData.signedUrl}" allowfullscreen></iframe>
-`
+loadLesson(getLessonId())
 </script>
 
 </body>
 </html>
-
- 
