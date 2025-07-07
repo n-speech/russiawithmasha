@@ -10,17 +10,14 @@
     }
     body {
       font-family: Arial, sans-serif;
-      padding: 1rem;
       margin: 0;
+      padding: 1rem;
       background: #f9f9f9;
       color: #241c15;
       overflow-x: hidden;
-      text-align: center;
     }
     #content {
       background: white;
-      margin: 0 auto;
-      max-width: 900px;
       border-radius: 0.5rem;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
       overflow: hidden;
@@ -48,7 +45,7 @@
 <div id="content"></div>
 
 <script type="module">
-  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
   // 🔑 Заменить на свои данные!
  const supabase = createClient(
@@ -56,44 +53,51 @@
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 )
 
-  const contentEl = document.getElementById('content')
-  const headingEl = document.querySelector('h1')
+// 🧑 Проверка авторизации
+const { data: { user } } = await supabase.auth.getUser()
+if (!user) {
+  document.body.innerHTML = '<h1>Доступ запрещён</h1><p>Пожалуйста, войдите в личный кабинет.</p>'
+  throw new Error('Нет доступа')
+}
 
-  // 🔐 Проверка авторизации
-  const { data: sessionData } = await supabase.auth.getSession()
-  const session = sessionData.session
+// 🆔 Получаем id урока из URL
+const getLessonId = () => new URLSearchParams(window.location.search).get('id')
+const lessonId = getLessonId()
+if (!lessonId) {
+  document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте ссылку.</p>'
+  throw new Error('lessonId отсутствует')
+}
 
-  if (!session) {
-    headingEl.textContent = 'Доступ запрещён'
-    contentEl.innerHTML = '<p>Пожалуйста, войдите в личный кабинет.</p>'
-    throw new Error('Пользователь не авторизован')
-  }
+// 📥 Получаем название и папку из таблицы lessons
+const { data: lessonData, error } = await supabase
+  .from('lessons')
+  .select('title, folder_name')
+  .eq('id', lessonId)
+  .single()
 
-  // 🧠 Название папки урока в бакете
-  const lessonFolder = 'lesson1'
-  const filePath = `${lessonFolder}/index.html`
+if (error || !lessonData) {
+  document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте правильность ссылки или доступ.</p>'
+  throw new Error('lesson not found')
+}
 
-  // 🎫 Получаем временную ссылку
-  const { data, error } = await supabase
-    .storage
-    .from('lessons')  // название бакета
-    .createSignedUrl(filePath, 60)  // 60 сек
+// 🔐 Получаем временную ссылку на index.html
+const { data: signedUrlData, error: signedUrlError } = await supabase
+  .storage
+  .from('lessons')
+  .createSignedUrl(`${lessonData.folder_name}/index.html`, 60 * 60) // 1 час
 
-  if (error || !data) {
-    headingEl.textContent = 'Ошибка загрузки'
-    contentEl.innerHTML = '<p>Не удалось получить доступ к уроку.</p>'
-    console.error(error)
-    return
-  }
+if (signedUrlError || !signedUrlData) {
+  document.body.innerHTML = '<h1>Ошибка загрузки</h1><p>Не удалось получить ссылку на урок.</p>'
+  throw new Error('signed URL error')
+}
 
-  // 🎉 Вставляем iframe с временной ссылкой
-  headingEl.textContent = 'Урок'
-  contentEl.innerHTML = `
-    <iframe src="${data.signedUrl}" allowfullscreen></iframe>
-  `
+// ✅ Вставляем iframe с уроком
+document.querySelector('h1').textContent = lessonData.title
+document.getElementById('content').innerHTML = `
+  <iframe src="${signedUrlData.signedUrl}" allowfullscreen></iframe>
+`
 </script>
 
 </body>
 </html>
-
 
