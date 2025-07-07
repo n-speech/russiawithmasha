@@ -5,14 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Урок</title>
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-    }
     body {
       font-family: Arial, sans-serif;
+      background: #f9f9f9;
       margin: 0;
       padding: 1rem;
-      background: #f9f9f9;
       color: #241c15;
       overflow-x: hidden;
     }
@@ -47,7 +44,7 @@
 <script type="module">
 import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
- const supabase = createClient(
+const supabase = createClient(
   'https://hisourxrdfdjhgwbrpgs.supabase.co',
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
 )
@@ -59,45 +56,38 @@ if (!user) {
   throw new Error('Нет доступа')
 }
 
-// 📌 Получаем ID из URL
-function getLessonId() {
-  const params = new URLSearchParams(window.location.search)
-  return params.get('id')
-}
-
-const lessonId = getLessonId()
+// Получаем ID урока
+const params = new URLSearchParams(window.location.search)
+const lessonId = params.get('id')
 if (!lessonId) {
   document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте ссылку.</p>'
-  throw new Error('lessonId отсутствует')
+  throw new Error('Нет lessonId')
 }
 
-// 🔎 Получаем info из таблицы `lessons`
+// Получаем title и folder_name
 const { data, error } = await supabase
   .from('lessons')
-  .select('title, order_number')
+  .select('title, folder_name')
   .eq('id', lessonId)
   .single()
 
 if (error || !data) {
   document.body.innerHTML = '<h1>Урок не найден</h1><p>Проверьте правильность ссылки или доступ.</p>'
-  throw new Error('lesson not found')
+  throw new Error('Урок не найден')
 }
 
-// Формируем имя папки из order_number
-const folderName = `lesson${data.order_number}`
-
-// 🔗 Получаем временную ссылку на index.html
+// Получаем ссылку на index.html внутри folder_name
 const { data: signedUrlData, error: signedUrlError } = await supabase
   .storage
   .from('lessons')
-  .createSignedUrl(`${folderName}/index.html`, 60 * 60) // 1 час
+  .createSignedUrl(`${data.folder_name}/index.html`, 60 * 60)
 
 if (signedUrlError || !signedUrlData) {
   document.body.innerHTML = '<h1>Ошибка загрузки</h1><p>Не удалось получить ссылку на урок.</p>'
   throw new Error('signed URL error')
 }
 
-// 🎉 Вставляем iframe
+// Показываем iframe
 document.querySelector('h1').textContent = data.title
 document.getElementById('content').innerHTML = `
   <iframe src="${signedUrlData.signedUrl}" allowfullscreen></iframe>
@@ -106,4 +96,5 @@ document.getElementById('content').innerHTML = `
 
 </body>
 </html>
+
  
