@@ -14,7 +14,7 @@
       margin: 0;
       background: #f9f9f9;
       color: #241c15;
-      overflow-x: hidden; /* 💡 Защита от горизонтального скролла */
+      overflow-x: hidden;
     }
     #content {
       background: white;
@@ -36,7 +36,7 @@
 
     @media (max-width: 650px) {
       iframe {
-        height: 600px; /* адаптация высоты под мобильный */
+        height: 600px;
       }
     }
   </style>
@@ -47,41 +47,46 @@
 <div id="content"></div>
 
 <script type="module">
-import { createClient } from 'https://esm.sh/@supabase/supabase-js'
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js'
 
-const supabase = createClient(
-  'https://hisourxrdfdjhgwbrpgs.supabase.co',
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
-)
+  const supabase = createClient(
+    'https://hisourxrdfdjhgwbrpgs.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhpc291cnhyZGZkamhnd2JycGdzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTE3MjQ5OTUsImV4cCI6MjA2NzMwMDk5NX0.mTMIj5cMPzB9EQmlo_P68nrT_cuWaQeczEReMdsQW7s'
+  )
 
-const headingEl = document.querySelector('h1')
-const contentEl = document.getElementById('content')
+  const headingEl = document.querySelector('h1')
+  const contentEl = document.getElementById('content')
 
-function getLessonId() {
-  const params = new URLSearchParams(window.location.search)
-  return params.get('id')
-}
-
-async function loadLesson(lessonId) {
-  const { data, error } = await supabase
-    .from('lessons')
-    .select('title, content_url')
-    .eq('id', lessonId)
-    .single()
-
-  if (error || !data) {
-    headingEl.textContent = 'Урок не найден'
-    contentEl.innerHTML = '<p>Проверьте правильность ссылки или доступ.</p>'
-    return
+  function getLessonId() {
+    const params = new URLSearchParams(window.location.search)
+    return params.get('id')
   }
 
-  headingEl.textContent = data.title
-  contentEl.innerHTML = `
-    <iframe src="${data.content_url}" allowfullscreen></iframe>
-  `
-}
+  async function loadLesson(lessonId) {
+    if (!lessonId) {
+      headingEl.textContent = 'ID урока не указан'
+      return
+    }
 
-loadLesson(getLessonId())
+    const { data, error } = await supabase
+      .from('lessons')
+      .select('title, content_url')
+      .eq('id', lessonId)
+      .single()
+
+    if (error || !data) {
+      headingEl.textContent = 'Урок не найден'
+      contentEl.innerHTML = '<p>Проверьте правильность ссылки или доступ.</p>'
+      return
+    }
+
+    headingEl.textContent = data.title || 'Без названия'
+    contentEl.innerHTML = `
+      <iframe src="${data.content_url}" allowfullscreen></iframe>
+    `
+  }
+
+  loadLesson(getLessonId())
 </script>
 
 </body>
