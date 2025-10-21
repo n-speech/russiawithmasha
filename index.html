@@ -29,21 +29,29 @@
     }
 
     /* ========== Base ========== */
- .banner {
- width: 100%; /* ширина контейнера nav-inner */
- margin-top: 18px; /* отступ от меню */
- display: flex;           /* включаем flexbox */
- justify-content: center;
-}
+.desktop-image {
+  position: relative;
+  padding-top: 0;
+  width: 100%;            /* 100% ширины окна */
+  display: block;  
+  margin: 0 auto;
+    }
 
-.banner img {
-  width: 90%;
-  height: auto; /* сохраняет пропорции */
-  border-radius: 10px; /* если хотите скругление как у меню */
-  display: block;
-}
+.mobile-image {
+   display: none;
+   width: 100%; /* 100% ширины окна */
+   padding-top: 0;
+   margin: 0 auto;
+    }
 
-
+@media (max-width: 767px) {
+  .desktop-image {
+   display: none;
+   }
+  .mobile-image {
+   display: block;
+  }
+    }
 
 
     *{box-sizing:border-box}
@@ -359,13 +367,12 @@
 
 
 <!-- ===== Banner ===== -->
-<div class="banner">
+
 
   <img src="img/img2.png" alt="Десктопная версия" class="desktop-image" />
   <!-- Показывается на мобильных -->
   <img src="img/mobile.png" alt="Мобильная версия" class="mobile-image" />
  
-</div>
 
 
 
@@ -556,6 +563,7 @@
   </script>
 </body>
 </html>
+
 
 
 
