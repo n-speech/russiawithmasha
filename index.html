@@ -30,21 +30,20 @@
 
     /* ========== Base ========== */
  .banner {
-  width: 90%;
-  margin-top: 18px; /* отступ сверху */
-  display: flex;
+ width: 100%; /* ширина контейнера nav-inner */
+  margin-top: 18px; /* отступ от меню */
+    display: flex;           /* включаем flexbox */
   justify-content: center;
 }
 
 .banner img {
-  width: 100%;
-  max-width: 1400px; /* ограничиваем слишком большую картинку на десктопе */
-  height: auto;
-  border-radius: 10px;
+   width: 90%;
+  height: auto; /* сохраняет пропорции */
+  border-radius: 10px; /* если хотите скругление как у меню */
   display: block;
 }
 
-}
+
 
 
     *{box-sizing:border-box}
@@ -557,6 +556,7 @@
   </script>
 </body>
 </html>
+
 
 
 
