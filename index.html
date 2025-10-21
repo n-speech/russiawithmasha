@@ -29,19 +29,21 @@
     }
 
     /* ========== Base ========== */
-    .banner {
-  width: 100%; /* ширина контейнера nav-inner */
-  margin-top: 18px; /* отступ от меню */
-    display: flex;           /* включаем flexbox */
+ .banner {
+  width: 90%;
+  margin-top: 18px; /* отступ сверху */
+  display: flex;
   justify-content: center;
 }
 
 .banner img {
-  width: 100%;
-  max-width: 1200px; /* ограничение для больших экранов */
-  min-width: 280px;  /* минимум на маленьких экранах */
+  width: 85%;
+  max-width: 1400px; /* ограничиваем слишком большую картинку на десктопе */
   height: auto;
   border-radius: 10px;
+  display: block;
+}
+
 }
 
 
@@ -356,10 +358,19 @@
     </div>
   </header>
 
-    <!-- ===== Banner ===== -->
+
+<!-- ===== Banner ===== -->
 <div class="banner">
-  <img src="img/img2.png" alt="Promo Banner" />
+  <img 
+    src="img/img2.png" 
+    srcset="img/mobile.png 760w, img/img2.png 1400w" 
+    sizes="(max-width: 760px) 100vw, 90vw"
+    alt="Promo Banner" />
 </div>
+
+
+
+  
 
 <!-- ===== Hero ===== -->
 <main>
@@ -546,6 +557,7 @@
   </script>
 </body>
 </html>
+
 
 
 
