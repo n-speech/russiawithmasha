@@ -1,67 +1,462 @@
-<!DOCTYPE html>
-<html lang="en">
+<!doctype html>
+<html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Welcome page</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Russia with Masha — Cours de russe avec Masha</title>
+  <meta name="description" content="Cours de russe faciles et modernes, accessibles 24h/7 en ligne. Inscrivez-vous aujourd'hui.">
+  <!-- Google Fonts (will load if online) -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700;800&family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet">
 
- <!-- custom style css link  -->
-  <link rel="stylesheet" href="css/style.css">
+    <link
+  rel="stylesheet"
+  href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-  <!-- font link -->
-   <link href="https://fonts.googleapis.com/css?family=Poppins" rel="stylesheet" type="text/css">
-  
-  <!-- fontawesome link-->
-   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+  <style>
+    /* ========== Variables ========== */
+    :root{
+      --bg: #fbfaf8;
+      --card: #ffffff;
+      --muted: #6b7280;
+      --accent: #3C8FBD;         /* bleu principal */
+      --accent-2: #f2c94c;       /* ornement doré */
+      --glass: rgba(255,255,255,0.7);
+      --radius: 14px;
+      --shadow-md: 0 8px 28px rgba(22, 23, 24, 0.08);
+      --shadow-sm: 0 6px 18px rgba(22, 23, 24, 0.06);
+      --max-w: 1120px;
+      --cop: clamp;
+    }
+
+    /* ========== Base ========== */
+    .banner {
+  width: 100%; /* ширина контейнера nav-inner */
+  margin-top: 18px; /* отступ от меню */
+    display: flex;           /* включаем flexbox */
+  justify-content: center;
+}
+
+.banner img {
+  width: 90%;
+  height: auto; /* сохраняет пропорции */
+  border-radius: 10px; /* если хотите скругление как у меню */
+  display: block;
+}
+
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0;
+      font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      background:linear-gradient(180deg,#fbfaf8 0%, #f7f6f4 100%);
+      color:#0f1724;
+      -webkit-font-smoothing:antialiased;
+      -moz-osx-font-smoothing:grayscale;
+      line-height:1.45;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    a{color:inherit; text-decoration:none}
+    img{max-width:100%;display:block}
+
+    .container{
+      width:90%;
+      max-width:var(--max-w);
+      margin:0 auto;
+    }
+
+    /* ========== Header / Nav ========== */
+    header.site-header{
+      position:sticky;
+      top:12px;
+      z-index:50;
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      margin: 12px 0;
+    }
+    .nav-inner{
+      display:flex;
+      gap:1rem;
+      align-items:center;
+      justify-content:space-between;
+      background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.75));
+      border-radius: 14px;
+      padding:0.6rem 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+    .brand{
+      display:flex;
+      gap:.9rem;
+      align-items:center;
+    }
+    .logo{
+      width: 200px;height:40px;border-radius:10px;
+      background:linear-gradient(135deg,var(--accent), #6f8cff);
+      display:flex;align-items:center;justify-content:center;color:white;font-weight:700;
+      box-shadow: 0 6px 18px rgba(43,110,246,0.18);
+      font-family: "Playfair Display", serif;
+      font-size:18px;
+    }
+    .brand h3{margin:0;font-size:1rem}
+    .brand p{margin:0;font-size:.78rem;color:var(--muted)}
+
+    nav.links{
+      display:flex;
+      gap:1rem;
+      align-items:center;
+    }
+    nav.links a{color:var(--muted);font-weight:600;padding:8px 12px;border-radius:10px}
+   
+
+    nav.links a.pill.primary:hover {
+  background: #1f6fbf; /* чуть темнее акцентного цвета */
+  color: #fff;          /* текст остаётся белым */
+}
+
+
+    .cta{
+      background:var(--accent);
+      color:white;
+      padding:10px 14px;border-radius:10px;font-weight:700;
+      box-shadow: 0 8px 30px rgba(43,110,246,0.18);
+      cursor:pointer;
+    }
+    .cta.secondary{
+      background:transparent;color:var(--accent);border:1px solid rgba(43,110,246,0.12);
+      box-shadow:none;font-weight:700;
+    }
+
+    /* ========== Hero ========== */
+    .hero{
+      display:grid;
+      grid-template-columns: 1fr 420px;
+      gap:36px;
+      align-items:center;
+      padding:60px 0 36px;
+    }
+    .hero-left{
+      padding: clamp(10px, 2.6vw, 30px);
+    }
+    .eyebrow{
+      display:inline-flex;
+      gap:10px;
+      align-items:center;
+      background: linear-gradient(90deg, rgba(242,201,76,0.15), rgba(43,110,246,0.06));
+      color:var(--muted);
+      padding:8px 12px;border-radius:999px;font-size:.9rem;margin-bottom:18px;
+    }
+    .eyebrow svg{width:18px;height:18px;opacity:.95}
+
+    h1.title{
+      font-family: "Playfair Display", serif;
+      font-size: clamp(1.8rem, 3.8vw, 2.8rem);
+      margin:0 0 18px;
+      color: #0b1220;
+      line-height:1.02;
+      letter-spacing:-0.02em;
+    }
+    p.lead{
+      font-size: clamp(.98rem, 1.8vw, 1.08rem);
+      color: #374151;
+      margin-bottom:20px;
+      max-width:56ch;
+    }
+
+    .hero-ctas{display:flex;gap:12px;flex-wrap:wrap}
+    .pill{
+      display:inline-flex;align-items:center;gap:10px;padding:12px 16px;border-radius:999px;font-weight:700;
+      box-shadow: var(--shadow-md);cursor:pointer;border:0;
+    }
+    .pill.primary{background:var(--accent);color:#fff}
+    
+    
+
+    /* Right panel: card with signup preview */
+    .hero-right{
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,250,250,0.85));
+      border-radius:16px;padding:20px;box-shadow:var(--shadow-md);
+    }
+    .session{
+      display:flex;flex-direction:column;gap:12px;
+    }
+    .session .meta{display:flex;justify-content:space-between;align-items:center}
+    .session .meta .time{font-weight:700;color:var(--accent)}
+    .session .meta .price{font-weight:800}
+    .session p{color:var(--muted);margin:0}
+    .session .btn{
+      margin-top:8px;background:var(--accent);color:#fff;padding:12px;border-radius:12px;font-weight:700;border:0;cursor:pointer;
+    }
+
+    /* ========== Features / How it works ========== */
+    .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:20px}
+    .feature{
+      background:var(--card);padding:18px;border-radius:12px;box-shadow:var(--shadow-sm);
+      display:flex;gap:12px;align-items:flex-start;
+    }
+    .feature svg{flex:0 0 44px;width:44px;height:44px;border-radius:10px;padding:8px;background:linear-gradient(180deg,var(--accent), #6f8cff);color:white}
+
+    /* How it works steps */
+    .steps{
+      display:flex;gap:18px;flex-wrap:wrap;align-items:stretch;
+    }
+    .step{
+      flex:1 1 220px;background:linear-gradient(180deg,#fff,#fbfbff);border-radius:14px;padding:18px;box-shadow:var(--shadow-sm);
+    }
+    .step .num{
+      width:40px;height:40px;border-radius:10px;background:var(--accent);color:white;display:flex;align-items:center;justify-content:center;font-weight:800;margin-bottom:10px;
+    }
+
+    /* Courses cards */
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px}
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,0.9), #ffffff);
+      border-radius:14px;padding:18px;box-shadow:var(--shadow-md);transition:transform .28s ease, box-shadow .28s ease;
+    }
+    .card:hover{transform:translateY(-8px);box-shadow:0 18px 48px rgba(17,24,39,0.12)}
+    .price{font-weight:800;font-size:1.1rem;color:var(--accent)}
+    .card ul{margin:10px 0 0;padding-left:18px;color:var(--muted)}
+
+    /* Testimonials */
+    .testimonials{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:18px}
+    .review{background:linear-gradient(180deg,#fff,#fcfdff);padding:18px;border-radius:12px;box-shadow:var(--shadow-sm);position:relative}
+    .review .author{margin-top:12px;font-weight:700;color:var(--accent)}
+
+    
+
+    /*footer */
+
+    footer{padding:28px 0;color:var(--muted);font-size:.95rem;text-align:center}
+
+    /* ========== Responsive ========== */
+    @media (max-width:1000px){
+      .hero{grid-template-columns:1fr 360px}
+      .grid-3{grid-template-columns:repeat(2,1fr)}
+    }
+    @media (max-width:760px){
+      header.site-header{position:static}
+      .nav-inner{flex-direction:column;align-items:stretch;gap:10px}
+      .hero{grid-template-columns:1fr;gap:20px;padding:36px 0}
+      .hero-right{order:2}
+      .contact-row{grid-template-columns:1fr}
+      .grid-3{grid-template-columns:1fr}
+    }
+
+    /* Small micro-interactions */
+    .sr-only{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
+    .focus-ring:focus{outline:3px solid rgba(59,108,251,0.18);outline-offset:4px;border-radius:10px}
+  </style>
 </head>
 <body>
-   <!--header start--> 
 
+  <!-- ===== Header ===== -->
+  <header class="site-header">
+    <div class="container nav-inner" role="navigation" aria-label="Main">
+      <div class="brand" aria-hidden="false">
+        <div class="logo" aria-hidden="true">Russia with Masha</div>
+        <div>
+          <h3>Apprenez le russe à travers la culture de la Russie </h3>
+          <p>avec Masha, professeur, philologue, native russe</p>
+        </div>
+      </div>
 
-  <header class="header">
-
- <a href="#" class="logo">Russia with Masha</a>
-
- <nav class="nav">
-    <button type="button" class="nav-toggle">
-      <i class="fas fa-bars"></i>
-    </button>
-    <ul class="nav-list">
-      <li class="nav-item"><a href="#home">Acceuil</a> </li>
-      <li class="nav-item"><a href="#cours">Cours</a> </li>
-      <li class="nav-item"><a href="#info">Info</a> </li>
-      <li class="nav-item"><a href="#contact">Contact</a> </li>
-    </ul>
- </nav>
-
+      <nav class="links" aria-label="Primary">
+        
+        <a href="#cours">Cours</a>
+        <a href="https://wa.me/972538023264" target="_blank" class="pill primary">S'inscrire</a>
+        <a href="https://student.native-speech.com/login" class="pill primary">Accéder aux cours</a>
+        
+       
+      </nav>
+    </div>
   </header>
 
-  <!--header end--> 
+    <!-- ===== Banner ===== -->
+<div class="banner">
+  <img src="img1.png" alt="Promo Banner" />
+</div>
+
+<!-- ===== Hero ===== -->
+<main>
+  <section class="container hero" aria-label="Introduction" style="display:flex; flex-wrap:wrap; gap:2rem; align-items:center;">
+    
+    <!-- Левая колонка -->
+    <div class="hero-left" style="flex:1 1 400px; min-width:280px;">
+      <div class="eyebrow" aria-hidden="true">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2l3 6 6 .5-4.5 4 1 6L12 16l-5.5 3.5 1-6L3 8.5 9 8 12 2z" fill="#f2c94c"/>
+        </svg>
+        Cours de russe en ligne - avancez à votre propre rythme
+      </div>
+
+      <h1 class="title">Cours de russe en ligne, conçus pour francophones et expliqués en français.</h1>
+
+      <p class="lead">
+        <i class="fa-solid fa-laptop"></i>
+        Apprenez 24h/24 sur mobile, tablette ou ordinateur
+      </p>
+      <p class="lead">
+        <i class="fa-solid fa-headphones"></i>
+        Plongez dans la langue russe authentique dès le premier cours, les enregistrements sont réalisés par Masha, locutrice native et philologue.
+      </p>
+      <p class="lead">
+        <i class="fa-solid fa-book-open"></i>
+        Profitez de la théorie expliquée en français — tout est compréhensible, même pour les vrais débutants!
+      </p>
+
+      <div class="hero-ctas" style="display:flex;gap:12px;flex-wrap:wrap">
+        <a class="pill primary" href="#cours">Voir les cours</a>
+        
+      </div>
+    </div>
+
+    <!-- Правая колонка с видео -->
+    <aside class="hero-right" style="flex:1 1 300px; min-width:280px; display:flex; justify-content:center; align-items:center;">
+      <div class="video-container" style="width:100%; max-width:500px; aspect-ratio:16/9;">
+        <iframe width="100%" height="100%"
+                src="https://www.youtube.com/embed/ВАШ_ИД_ВИДЕО"
+                title="YouTube video player"
+                frameborder="0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowfullscreen>
+        </iframe>
+      </div>
+    </aside>
+
+  </section>
+</main>
 
 
-  <!-- home section start -->
-   <section id="home" class="home">
-        <div class="img">
-          <img src="img/img1.png">
+
+
+
+
+    <!-- ===== Cours ===== -->
+    <section id="cours" class="container" style="padding-top:10px">
+      <h2 style="text-align:center">Les cours les plus populaires</h2>
+      <div style="margin-top:18px" class="cards">
+        <div class="card" aria-hidden="false">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800;font-size:1.1rem">Niveau 1 - pour les étudiants sans expérience préalable en russe</div>
+              <div style="color:var(--muted);font-size:.92rem">30 leçons: alphabet, prononciation, règles de lecture, phrases pour communication. Chaque leçon contient:</div>
+            </div>
+            <div class="price">€39</div>
+          </div>
+          <ul style="margin-top:12px;color:var(--muted)">
+            <li>présentation du matériel en video </li>
+            <li>Support audio / PDF</li>
+            <li>exercices interactifs pour pratiquer et réviser</li>
+            <li>un devoir</li>
+            <li>correction de devoir et de prononciation par Masha </li>
+          </ul>
+          <div style="margin-top:12px"><button class="pill primary">Choisir</button></div>
         </div>
 
-        <div class="content">
-          
-          <h2>Bonjour à toutes et à tous</h2>
-          <h2>Bienvenue dans le cours "Le russe pour les débutants"</h2>
-          <p>Si vous souhaitez apprendre le russe de manière sérieuse et structurée, je vous invite à découvrir mon cours de russe en ligne, spécialement conçu pour les francophones.
-            Toutes les explications sont données en français, ce qui vous permettra de comprendre 100 % du contenu sans difficulté.</p>
-            <a href="login.html" class="content">Войти</a>
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800;font-size:1.1rem">Niveau 1 Intensif</div>
+              <div style="color:var(--muted);font-size:.92rem">plus 2 zoom de 40 minutes avec Masha pour bien retenir ce que vous avez appris </div>
+            </div>
+            <div class="price">€69</div>
+          </div>
+          <ul style="margin-top:12px;color:var(--muted)">
+            <li>présentation du matériel en video </li>
+            <li>Support audio / PDF</li>
+            <li>exercices interactifs pour pratiquer et réviser</li>
+            <li>un devoir</li>
+            <li>correction douce de devoir et de prononciation par Masha </li>
+            <li>2 zoom de 40 minutes avec Masha</li>
+            
+          </ul>
+          <div style="margin-top:12px"><button class="pill primary">Choisir</button></div>
         </div>
 
-   </section>
-   <!-- home section end -->
+        <div class="card">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-weight:800;font-size:1.1rem">Conversation</div>
+              <div style="color:var(--muted);font-size:.92rem">Séances à la carte</div>
+            </div>
+            <div class="price">€30 / séance</div>
+          </div>
+          <ul style="margin-top:12px;color:var(--muted)">
+            <li>45 min</li>
+            <li>Thèmes actuels</li>
+            <li>Corrections en direct</li>
+          </ul>
+          <div style="margin-top:12px"><button class="pill primary" >Choisir</button></div>
+        </div>
+      </div>
+    </section>
+
+   
+
+    <!-- ===== How it works ===== -->
+    <section class="container" style="padding-top:10px">
+      <h2 style="text-align:center">Comment ça marche</h2>
+      <div style="margin-top:18px;display:flex;gap:18px;flex-wrap:wrap">
+        <div class="step">
+          <div class="num">1</div>
+          <div style="font-weight:700">Vous m'envoyez un message par WhatsApp</div>
+          <div style="color:var(--muted);margin-top:8px">On a une discussion courte pour définir votre niveau et choisir un cours .</div>
+        </div>
+        <div class="step">
+          <div class="num">2</div>
+          <div style="font-weight:700">Accès au cours</div>
+          <div style="color:var(--muted);margin-top:8px">Vous recevez votre login et le mot de passe.</div>
+        </div>
+        <div class="step">
+          <div class="num">3</div>
+          <div style="font-weight:700">Ça y est! Vous pouvez commencer à apprendre. Bon courage!</div>
+          <div style="color:var(--muted);margin-top:8px"> Vous accédez au cours directement depuis le site.</div>
+        </div>
+      </div>
+    </section>
+
+    
+
+    <!-- ===== Testimonials ===== -->
+    <section id="avis" class="container" style="padding-top:10px">
+      <h2 style="text-align:center">Ils témoignent</h2>
+      <div style="margin-top:18px" class="testimonials">
+        <div class="review">
+          <div style="font-size:1rem">« J'ai gagné confiance en 6 semaines. Masha corrige avec douceur et précision. »</div>
+          <div class="author">— Camille, Paris</div>
+        </div>
+        <div class="review">
+          <div style="font-size:1rem">« Méthode claire, progrès visible. Je recommande pour la préparation d'entretien. »</div>
+          <div class="author">— Sarah, Moscou</div>
+        </div>
+      </div>
+    </section>
+
+   
+
+    <footer>
+      <div class="container" style="display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>Russia with Masha • 2025</div>
+        <div style="color:var(--muted)">Email: <a href="mailto:info@francais-pro.example">info@native-speech.com</a></div>
+      </div>
+    </footer>
+  </main>
 
 
 
 
-  <!--script file js--> 
-  <script src="js/script.js"></script>
+  <script>
+    // Smooth scroll for anchor links
+    document.querySelectorAll('a[href^="#"]').forEach(a=>{
+      a.addEventListener('click', e=>{
+        e.preventDefault();
+        const id = a.getAttribute('href').slice(1);
+        const el = document.getElementById(id);
+        if(el) el.scrollIntoView({behavior:'smooth',block:'start'});
+      });
+    });
 
+    
+    
+  </script>
 </body>
 </html>
