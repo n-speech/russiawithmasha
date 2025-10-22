@@ -445,6 +445,13 @@ nav.links .pill:hover {
     gap: 10px;
   }
 }
+
+    /* Убираем синий highlight только для email в dropdown */
+.dropdown-content a {
+  outline: none;                 /* убирает контур при фокусе */
+  -webkit-tap-highlight-color: transparent; /* убирает подсветку на мобильных */
+}
+
   </style>
 </head>
 <body>
@@ -686,6 +693,7 @@ document.addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
