@@ -407,6 +407,47 @@ nav.links a.pill.primary:hover {
   }
 }
 
+    /* ===== Dropdown ===== */
+.dropdown {
+  position: relative;
+  display: inline-block;
+}
+
+.dropdown-content {
+  display: none;
+  position: absolute;
+  top: 120%;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: #fff;
+  min-width: 200px;
+  padding: 12px;
+  border-radius: 10px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+  z-index: 100;
+  text-align: center;
+}
+
+.dropdown-content p {
+  margin: 6px 0;
+  font-size: 1rem;
+}
+
+.dropdown-content a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.dropdown-content a:hover {
+  text-decoration: underline;
+}
+
+/* Показать dropdown при клике */
+.dropdown.show .dropdown-content {
+  display: block;
+}
+
+
   </style>
 </head>
 <body>
@@ -423,11 +464,17 @@ nav.links a.pill.primary:hover {
       </div>
 
       <nav class="links" aria-label="Primary">
+
+         <!-- Dropdown для S'inscrire -->
+      <div class="dropdown">
+        <button class="pill primary">S'inscrire</button>
+        <div class="dropdown-content">
+          <p>Téléphone: <a href="tel:+972538023264">+972 53 802 3264</a></p>
+          <p>Email: <a href="mailto:info@native-speech.com">info@native-speech.com</a></p>
+        </div>
+      </div>
         
-        <a href="https://wa.me/972538023264" target="_blank" class="pill primary">S'inscrire</a>
         <a href="https://student.native-speech.com/login" class="pill primary">Se connecter</a>
-        
-       
       </nav>
     </div>
   </header>
@@ -625,11 +672,25 @@ nav.links a.pill.primary:hover {
       });
     });
 
-    
+    // JS для dropdown
+document.querySelectorAll('.dropdown > .pill').forEach(button => {
+  button.addEventListener('click', function(e) {
+    e.stopPropagation();
+    const parent = this.parentElement;
+    parent.classList.toggle('show');
+  });
+});
+
+// Закрывать dropdown при клике вне кнопки
+document.addEventListener('click', () => {
+  document.querySelectorAll('.dropdown').forEach(drop => drop.classList.remove('show'));
+});
+
     
   </script>
 </body>
 </html>
+
 
 
 
