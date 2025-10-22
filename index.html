@@ -373,6 +373,38 @@
     /* Small micro-interactions */
     .sr-only{position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden}
     .focus-ring:focus{outline:3px solid rgba(59,108,251,0.18);outline-offset:4px;border-radius:10px}
+
+    /* ===== Кнопки S’inscrire / Se connecter ===== */
+nav.links a {
+  display: flex;                 /* центрируем содержимое */
+  justify-content: center;       /* по горизонтали */
+  align-items: center;           /* по вертикали */
+  min-width: 140px;              /* минимальная ширина */
+  padding: 10px 16px;            /* внутренние отступы */
+  font-weight: 600;
+  text-align: center;
+  border-radius: 10px;
+  transition: background 0.3s ease, color 0.3s ease;
+  box-sizing: border-box;
+}
+
+nav.links a.pill.primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+nav.links a.pill.primary:hover {
+  background: #1f6fbf;
+}
+
+/* мобильная адаптация */
+@media (max-width: 760px) {
+  nav.links a {
+    flex: 1;                    /* кнопки растягиваются равномерно */
+    min-width: 130px;           /* не меньше заданной ширины */
+  }
+}
+
   </style>
 </head>
 <body>
@@ -596,6 +628,7 @@
   </script>
 </body>
 </html>
+
 
 
 
