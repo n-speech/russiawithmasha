@@ -247,22 +247,25 @@
     text-align: center;
   }
 
-      nav.links {
-    display: flex;
-    flex-direction: column;
-    align-items: center;  /* Центрирует ссылки */
-    gap: 10px;
-  }
-      nav.links a {
-    width: 100%;
+ nav.links a {
+    width: auto;           /* отмена растяжения */
     text-align: center;
+    padding: 10px 16px;
+  }
+   nav.links {
+    display: flex;
+    flex-direction: row;   /* в одну строку */
+    justify-content: center; /* по центру */
+    align-items: center;
+    gap: 12px; /* расстояние между кнопками */
+    width: auto;
   }
       
-  .nav-inner {
-    gap: 8px; /* увеличиваем расстояние между ссылками */
-     flex-direction: column;
-    align-items: center;  /* Центрирует элементы по горизонтали */
-    justify-content: center; /* отменяет space-between по высоте */
+ .nav-inner {
+    flex-direction: column;
+    align-items: center; /* центрируем всё содержимое */
+    justify-content: center;
+    gap: 10px;
   }
 
   .cta, .pill {
@@ -576,6 +579,7 @@
   </script>
 </body>
 </html>
+
 
 
 
