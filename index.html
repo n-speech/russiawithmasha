@@ -247,8 +247,22 @@
     text-align: center;
   }
 
+      nav.links {
+    display: flex;
+    flex-direction: column;
+    align-items: center;  /* Центрирует ссылки */
+    gap: 10px;
+  }
+      nav.links a {
+    width: 100%;
+    text-align: center;
+  }
+      
   .nav-inner {
     gap: 8px; /* увеличиваем расстояние между ссылками */
+     flex-direction: column;
+    align-items: center;  /* Центрирует элементы по горизонтали */
+    justify-content: center; /* отменяет space-between по высоте */
   }
 
   .cta, .pill {
@@ -562,6 +576,7 @@
   </script>
 </body>
 </html>
+
 
 
 
