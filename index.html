@@ -366,7 +366,7 @@ nav.links .pill {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 100px;  /* минимальная ширина кнопки */
+  max-width: 100px;  /* минимальная ширина кнопки */
   height: 40px;      /* одинаковая высота */
   padding: 3 6px;   /* горизонтальные отступы */
   font-weight: 600;
@@ -436,9 +436,9 @@ nav.links .pill:hover {
   nav.links a,
   nav.links .pill {
     flex: 1;          /* кнопки растягиваются равномерно */
-    min-width: 120px;
-    height: 48px;
-    font-size: 1.1rem;
+    max-width: 110px;
+    height: 45px;
+    font-size: 1rem;
   }
 
   .nav-inner {
@@ -695,6 +695,7 @@ document.addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
