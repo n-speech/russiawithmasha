@@ -110,7 +110,7 @@
       align-items:center;
       
     }
-    nav.links a{color:var(--muted);font-weight:600;min-width:120px;text-align:center;font-size:1rem;padding:8px 12px;border-radius:10px}
+   /* nav.links a{color:var(--muted);font-weight:600;min-width:120px;text-align:center;font-size:1rem;padding:8px 12px;border-radius:10px}*/
    
 
     nav.links a.pill.primary:hover {
@@ -305,10 +305,10 @@
     font-size: 1.2rem; /* подзаголовок */
   }
 
-  nav.links a {
-    font-size: 1.2rem; /* ссылки меню */
+  /*nav.links a {
+    font-size: 1.2rem;
     padding: 10px 14px; /* увеличить кликабельную область */
-  }
+  }*/
 
   .hero-left h1.title {
     font-size: 2rem; /* главный заголовок */
@@ -366,11 +366,11 @@ nav.links .pill {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-width: 140px;  /* минимальная ширина кнопки */
-  height: 48px;      /* одинаковая высота */
-  padding: 0 16px;   /* горизонтальные отступы */
+  min-width: 110px;  /* минимальная ширина кнопки */
+  height: 40px;      /* одинаковая высота */
+  padding: 3 6px;   /* горизонтальные отступы */
   font-weight: 600;
-  font-size: 1.1rem;
+  font-size: 1rem;
   line-height: 1;
   text-align: center;
   border-radius: 10px;
@@ -400,8 +400,8 @@ nav.links .pill:hover {
   left: 50%;
   transform: translateX(-50%);
   background-color: #fff;
-  min-width: 200px;
-  padding: 12px;
+  min-width: 180px;
+  padding: 10px;
   border-radius: 10px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.15);
   z-index: 100;
@@ -409,14 +409,14 @@ nav.links .pill:hover {
 }
 .dropdown-content p {
   margin: 6px 0;
-  font-size: 1rem;
+  font-size: 0.5rem;
 }
 .dropdown-content a {
   color: var(--accent);
   text-decoration: none;
 }
 .dropdown-content a:hover {
-  text-decoration: underline;
+  text-decoration: none;
 }
 .dropdown.show .dropdown-content {
   display: block;
@@ -693,6 +693,7 @@ document.addEventListener('click', () => {
   </script>
 </body>
 </html>
+
 
 
 
